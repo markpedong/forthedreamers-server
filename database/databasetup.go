@@ -1,20 +1,48 @@
 package database
 
 import (
+	"fmt"
+	"log"
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
-func ConnectDB() *gorm.DB {
-	// https://github.com/go-gorm/postgres
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN:                  "user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai",
-		PreferSimpleProtocol: true, // disables implicit prepared statement usage
-	}), &gorm.Config{})
+var DB *gorm.DB
 
+func ConnectDB() {
+	var err error
+	DB, err = gorm.Open(postgres.Open(os.Getenv("DB_DSN")),
+		&gorm.Config{
+			NamingStrategy: schema.NamingStrategy{SingularTable: true},
+		})
 	if err != nil {
-		panic(err)
+		log.Fatal(err.Error())
+		return
 	}
 
-	return db
+	err = DB.AutoMigrate(
+	// &models.Users{},
+	// &models.Links{},
+	// &models.Services{},
+	// &models.Messages{},
+	// &models.Portfolios{},
+	// &models.Blogs{},
+	// &models.Education{},
+	// &models.Experiences{},
+	// &models.ExpSkill{},
+	// &models.EduSkill{},
+	// &models.Testimonials{},
+	// &models.Website{},
+	// &models.Color{},
+	// &models.ExpDesc{},
+	)
+	if err != nil {
+		log.Fatal(err.Error())
+		return
+	}
+
+	fmt.Println("--------------------Connected to Database---------------------")
 }
