@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/forthedreamers-server/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -24,20 +25,7 @@ func ConnectDB() {
 	}
 
 	err = DB.AutoMigrate(
-	// &models.Users{},
-	// &models.Links{},
-	// &models.Services{},
-	// &models.Messages{},
-	// &models.Portfolios{},
-	// &models.Blogs{},
-	// &models.Education{},
-	// &models.Experiences{},
-	// &models.ExpSkill{},
-	// &models.EduSkill{},
-	// &models.Testimonials{},
-	// &models.Website{},
-	// &models.Color{},
-	// &models.ExpDesc{},
+		&models.Users{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())
