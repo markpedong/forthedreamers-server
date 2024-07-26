@@ -33,6 +33,15 @@ func CreateRoutes(r *gin.Engine) {
 	{
 		collections.POST("/add", controllers.AddCollection)
 		collections.POST("/get", controllers.GetCollection)
+		collections.POST("/update", controllers.UpdateCollection)
+	}
+
+	products := r.Group("/products")
+	products.Use(middleware.Authentication)
+	{
+		products.POST("/add", controllers.AddProducts)
+		products.POST("/get", controllers.GetProducts)
+		products.POST("/update", controllers.UpdateProducts)
 	}
 
 	users := r.Group("/users")
@@ -40,5 +49,6 @@ func CreateRoutes(r *gin.Engine) {
 	{
 		users.POST("/add", controllers.AddUsers)
 		users.POST("/get", controllers.GetUsers)
+		users.POST("/update", controllers.UpdateUsers)
 	}
 }
