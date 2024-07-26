@@ -59,6 +59,7 @@ func Login(ctx *gin.Context) {
 	userRes := map[string]interface{}{
 		"token":         token,
 		"refresh_token": refreshToken,
+		"userInfo":      existingUser,
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
