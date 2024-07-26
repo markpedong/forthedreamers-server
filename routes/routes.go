@@ -27,4 +27,18 @@ func CreateRoutes(r *gin.Engine) {
 	{
 		api.POST("/uploadImage", controllers.UploadImage)
 	}
+
+	collections := r.Group("/collections")
+	collections.Use(middleware.Authentication)
+	{
+		collections.POST("/add", controllers.AddCollection)
+		collections.POST("/get", controllers.GetCollection)
+	}
+
+	users := r.Group("/users")
+	users.Use(middleware.Authentication)
+	{
+		users.POST("/add", controllers.AddUsers)
+		users.POST("/get", controllers.GetUsers)
+	}
 }

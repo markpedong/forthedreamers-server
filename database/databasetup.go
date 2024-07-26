@@ -26,6 +26,8 @@ func ConnectDB() {
 
 	err = DB.AutoMigrate(
 		&models.Users{},
+		&models.Collection{},
+		&models.Product{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())
