@@ -56,6 +56,6 @@ func UpdateCollection(ctx *gin.Context) {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&currCollection))
+	helpers.JSONResponse(ctx, "")
 
 }
