@@ -3,6 +3,7 @@ package helpers
 import (
 	"net/http"
 
+	"github.com/forthedreamers-server/database"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
@@ -65,4 +66,21 @@ func BindValidateJSON(ctx *gin.Context, body interface{}) error {
 	}
 
 	return nil
+}
+
+func GetTableByModelStatusON(ctx *gin.Context, model interface{}, preload ...string) interface{} {
+	query := database.DB.Where("status = ?", 1).Order("created_at DESC")
+
+	if len(preload) > 0 {
+		for _, p := range preload {
+			query = query.Preload(p)
+		}
+	}
+
+	if err := query.Find(model).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return nil
+	}
+
+	return model
 }
