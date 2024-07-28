@@ -59,3 +59,25 @@ func UpdateCollection(ctx *gin.Context) {
 	helpers.JSONResponse(ctx, "")
 
 }
+
+func DeleteCollection(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+
+	var currCollection models.Collection
+	if err := database.DB.First(&currCollection, "id = ?", body.ID).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := database.DB.Delete(&currCollection).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(ctx, "")
+}
