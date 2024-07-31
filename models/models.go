@@ -32,10 +32,11 @@ type Collection struct {
 }
 
 type ProductVariation struct {
+	ID        string                `json:"id" gorm:"primaryKey"`
 	Size      string                `json:"size" validate:"required"`
 	Color     string                `json:"color" validate:"required"`
-	Price     string                `json:"price" validate:"required"`
-	Quantity  string                `json:"quantity" validate:"required"`
+	Price     int                   `json:"price" validate:"required"`
+	Quantity  int                   `json:"quantity" validate:"required"`
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`
@@ -48,7 +49,7 @@ type Product struct {
 	Name              string                `json:"name" validate:"required"`
 	Description       string                `json:"description" validate:"required"`
 	CollectionID      string                `json:"collection_id"`
-	ProductVariations []ProductVariation    `json:"product_variations" gorm:"foreignKey:ProductID"`
+	ProductVariations []ProductVariation    `json:"variations" gorm:"foreignKey:ProductID"`
 	Images            pq.StringArray        `json:"images" gorm:"type:text[]"  validate:"required"`
 	CreatedAt         int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt         int                   `json:"updated_at" gorm:"autoUpdateTime"`

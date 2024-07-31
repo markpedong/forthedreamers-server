@@ -11,7 +11,7 @@ import (
 
 func GetProducts(ctx *gin.Context) {
 	var products []models.Product
-	if err := database.DB.Order("created_at DESC").Find(&products).Error; err != nil {
+	if err := database.DB.Preload("ProductVariations").Order("created_at DESC").Find(&products).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -32,6 +32,22 @@ func AddProducts(ctx *gin.Context) {
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
 	}
+
+	var variations []models.ProductVariation
+	for _, v := range body.Variations {
+		variation := models.ProductVariation{
+			Size:      v.Size,
+			Color:     v.Color,
+			Price:     v.Price,
+			Quantity:  v.Quantity,
+			ID:        helpers.NewUUID(),
+			ProductID: newProduct.ID,
+		}
+
+		variations = append(variations, variation)
+	}
+
+	newProduct.ProductVariations = variations
 
 	if err := database.DB.Create(&newProduct).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())

@@ -22,14 +22,19 @@ type UserPayload struct {
 	Password  string `json:"password" validate:"required"`
 }
 
+type ProductVariationPayload struct {
+	ID       string `json:"id"`
+	Size     string `json:"size" validate:"required"`
+	Color    string `json:"color" validate:"required"`
+	Price    int    `json:"price" validate:"required"`
+	Quantity int    `json:"quantity" validate:"required"`
+}
+
 type ProductPayload struct {
-	ID           string         `json:"id"`
-	Name         string         `json:"name" validate:"required"`
-	Description  string         `json:"Description" validate:"required"`
-	CollectionID string         `json:"collection_id"`
-	Price        int            `json:"price" validate:"required"`
-	Quantity     int            `json:"quantity" validate:"required"`
-	Images       pq.StringArray `json:"images" gorm:"type:text[]"  validate:"required"`
-	Size         pq.StringArray `json:"sizes" gorm:"type:text[]" validate:"required"`
-	Color        pq.StringArray `json:"colors" gorm:"type:text[]" validate:"required"`
+	ID           string                    `json:"id"`
+	Name         string                    `json:"name" validate:"required"`
+	Description  string                    `json:"Description" validate:"required"`
+	CollectionID string                    `json:"collection_id"`
+	Images       pq.StringArray            `json:"images" gorm:"type:text[]"  validate:"required"`
+	Variations   []ProductVariationPayload `json:"variations" validate:"required"`
 }

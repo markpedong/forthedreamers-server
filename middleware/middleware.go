@@ -18,13 +18,19 @@ import (
 func Authentication(ctx *gin.Context) {
 	tokenStr, err := ctx.Cookie("Auth")
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "")
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
 		ctx.Abort()
+		return
+	}
+
+	if tokenStr == "" {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Token is missing")
+		ctx.Abort()
+		return
 	}
 
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			ctx.Abort()
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 

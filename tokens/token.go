@@ -21,6 +21,15 @@ func CreateAndSignJWT(user *models.Users) (string, error) {
 }
 
 func SetCookie(ctx *gin.Context, token string) {
-	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("Auth", token, 3600*24*100, "", "", false, true)
+	// server side only
+	// ctx.SetSameSite(http.SameSiteNoneMode)
+	// ctx.SetCookie("Auth", token, 3600*24*100, "/", "", false, true)
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "Auth",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
 }
