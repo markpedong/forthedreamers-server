@@ -53,6 +53,13 @@ func TokenGenerator(email, firstName, lastName, uid string) (signedToken, signed
 	return token, refreshToken, nil
 }
 
+// func TokenGenerator2(userID string) {
+// 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
+// 		"userID": userID,
+// 		"ttl":    time.Now().Add(time.Hour * 24 * 100).Unix(),
+// 	})
+// }
+
 func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
 	token, err := jwt.ParseWithClaims(signedToken, &SignedDetails{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(SECRET_KEY), nil

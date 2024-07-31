@@ -31,17 +31,27 @@ type Collection struct {
 	DeletedAt soft_delete.DeletedAt `json:"-"`
 }
 
+type ProductVariation struct {
+	Size      string                `json:"size" validate:"required"`
+	Color     string                `json:"color" validate:"required"`
+	Price     string                `json:"price" validate:"required"`
+	Quantity  string                `json:"quantity" validate:"required"`
+	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt soft_delete.DeletedAt `json:"-"`
+	ProductID string                `json:"product_id"`
+	Status    int                   `json:"status" gorm:"default:0"`
+}
+
 type Product struct {
-	ID           string                `json:"id" gorm:"primaryKey"`
-	Name         string                `json:"name" validate:"required"`
-	Description  string                `json:"description" validate:"required"`
-	CollectionID string                `json:"collection_id"`
-	Price        int                   `json:"price" validate:"required"`
-	Quantity     int                   `json:"quantity" validate:"required"`
-	Images       pq.StringArray        `json:"images" gorm:"type:text[]"  validate:"required"`
-	Size         pq.StringArray        `json:"sizes" gorm:"type:text[]" validate:"required"`
-	Color        pq.StringArray        `json:"colors" gorm:"type:text[]" validate:"required"`
-	CreatedAt    int                   `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt    int                   `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt    soft_delete.DeletedAt `json:"-"`
+	ID                string                `json:"id" gorm:"primaryKey"`
+	Name              string                `json:"name" validate:"required"`
+	Description       string                `json:"description" validate:"required"`
+	CollectionID      string                `json:"collection_id"`
+	ProductVariations []ProductVariation    `json:"product_variations" gorm:"foreignKey:ProductID"`
+	Images            pq.StringArray        `json:"images" gorm:"type:text[]"  validate:"required"`
+	CreatedAt         int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt         int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt         soft_delete.DeletedAt `json:"-"`
+	Status            int                   `json:"status" gorm:"default:0"`
 }

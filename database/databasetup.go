@@ -28,6 +28,7 @@ func ConnectDB() {
 		&models.Users{},
 		&models.Collection{},
 		&models.Product{},
+		&models.ProductVariation{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())

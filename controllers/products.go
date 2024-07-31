@@ -31,10 +31,6 @@ func AddProducts(ctx *gin.Context) {
 		Images:       body.Images,
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
-		Price:        body.Price,
-		Quantity:     body.Quantity,
-		Size:         body.Size,
-		Color:        body.Color,
 	}
 
 	if err := database.DB.Create(&newProduct).Error; err != nil {
@@ -62,10 +58,6 @@ func UpdateProducts(ctx *gin.Context) {
 		Images:       body.Images,
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
-		Price:        body.Price,
-		Quantity:     body.Quantity,
-		Size:         body.Size,
-		Color:        body.Color,
 	}).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
