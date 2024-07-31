@@ -50,18 +50,19 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	token, refreshToken, err := tokens.TokenGenerator(existingUser.Email, existingUser.FirstName, existingUser.LastName, existingUser.ID)
+	token, err := tokens.CreateAndSignJWT(&existingUser)
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	tokens.SetCookie(ctx, token)
 	userRes := map[string]interface{}{
-		"token":         token,
-		"refresh_token": refreshToken,
-		"userInfo":      existingUser,
+		"token":    token,
+		"userInfo": existingUser,
 	}
 
+	ctx.Redirect(http.StatusFound, "/app/users")
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }
 

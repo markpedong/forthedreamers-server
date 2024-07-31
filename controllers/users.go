@@ -50,11 +50,7 @@ func UpdateUsers(ctx *gin.Context) {
 		return
 	}
 
-	var currUser models.Users
-	if err := database.DB.Find(&currUser, "id = ?", body.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
+	var currUser = GetUserByID(body.ID, ctx)
 
 	if err := database.DB.Model(&currUser).Updates(models.Users{
 		FirstName: body.FirstName,
@@ -71,4 +67,14 @@ func UpdateUsers(ctx *gin.Context) {
 	}
 
 	helpers.JSONResponse(ctx, "")
+}
+
+func GetUserByID(id string, ctx *gin.Context) *models.Users {
+	var currUser models.Users
+	if err := database.DB.Find(&currUser, "id = ?", id).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return nil
+	}
+
+	return &currUser
 }

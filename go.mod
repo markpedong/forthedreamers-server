@@ -11,6 +11,7 @@ require (
 require (
 	github.com/creasty/defaults v1.5.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 )
 

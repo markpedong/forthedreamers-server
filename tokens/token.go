@@ -1,85 +1,26 @@
 package tokens
 
 import (
-	"fmt"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/forthedreamers-server/models"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
-type SignedDetails struct {
-	Email     string
-	FirstName string
-	LastName  string
-	Uid       string
-	jwt.StandardClaims
-}
-
-var SECRET_KEY = os.Getenv("SECRET_KEY")
-
-const (
-	tokenDuration        = 12 * time.Hour
-	refreshTokenDuration = 12 * time.Hour
-)
-
-func TokenGenerator(email, firstName, lastName, uid string) (signedToken, signedRefreshToken string, err error) {
-	claims := &SignedDetails{
-		Email:     email,
-		FirstName: firstName,
-		LastName:  lastName,
-		Uid:       uid,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenDuration).Unix(),
-		},
-	}
-
-	refreshClaims := &SignedDetails{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(refreshTokenDuration).Unix(),
-		},
-	}
-
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to generate access token: %v", err)
-	}
-
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to generate refresh token: %v", err)
-	}
-
-	return token, refreshToken, nil
-}
-
-// func TokenGenerator2(userID string) {
-// 	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-// 		"userID": userID,
-// 		"ttl":    time.Now().Add(time.Hour * 24 * 100).Unix(),
-// 	})
-// }
-
-func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
-	token, err := jwt.ParseWithClaims(signedToken, &SignedDetails{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(SECRET_KEY), nil
+func CreateAndSignJWT(user *models.Users) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": user.ID,
+		"ttl":    time.Now().Add(time.Hour * 24 * 100).Unix(),
 	})
 
-	if err != nil {
-		msg = err.Error()
-		return &SignedDetails{}, msg
-	}
+	return token.SignedString([]byte(os.Getenv("HMAC_SECRET")))
 
-	claims, ok := token.Claims.(*SignedDetails)
-	if !ok || !token.Valid {
-		msg = "the token is invalid"
-		return &SignedDetails{}, msg
-	}
+}
 
-	if time.Now().After(time.Unix(claims.ExpiresAt, 0)) {
-		msg = "token is already expired"
-		return claims, msg
-	}
-
-	return claims, msg
+func SetCookie(ctx *gin.Context, token string) {
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("Auth", token, 3600*24*100, "", "", false, true)
 }
