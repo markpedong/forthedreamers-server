@@ -19,11 +19,12 @@ func Authentication(ctx *gin.Context) {
 	tokenStr, err := ctx.Cookie("Auth")
 	if err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "")
-		return
+		ctx.Abort()
 	}
 
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			ctx.Abort()
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
@@ -31,24 +32,24 @@ func Authentication(ctx *gin.Context) {
 	})
 	if err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
-		return
+		ctx.Abort()
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT Claims failed")
-		return
+		ctx.Abort()
 	}
 
-	if claims["ttl"].(int64) > time.Now().Unix() {
+	if claims["ttl"].(float64) < float64(time.Now().Unix()) {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT token expired")
-		return
+		ctx.Abort()
 	}
 
 	user := controllers.GetUserByID(claims["userID"].(string), ctx)
 	if user.ID == "" {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Could not find the User")
-		return
+		ctx.Abort()
 	}
 
 	ctx.Set("user", user)
