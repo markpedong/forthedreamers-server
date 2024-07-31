@@ -62,7 +62,6 @@ func Login(ctx *gin.Context) {
 		"userInfo": existingUser,
 	}
 
-	ctx.Redirect(http.StatusFound, "/app/users")
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }
 
