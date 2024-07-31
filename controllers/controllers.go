@@ -66,6 +66,11 @@ func Login(ctx *gin.Context) {
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }
 
+func Logout(ctx *gin.Context) {
+	ctx.SetCookie("Auth", "deleted", 0, "", "", false, true)
+	ctx.Redirect(http.StatusFound, "/")
+}
+
 func UploadImage(ctx *gin.Context) {
 	form, err := ctx.FormFile("file")
 
