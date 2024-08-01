@@ -56,3 +56,21 @@ func ToggleVariations(ctx *gin.Context) {
 
 	helpers.JSONResponse(ctx, "")
 }
+
+func DeleteVariations(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+
+	var currVariation models.ProductVariation
+	if err := helpers.GetCurrentByID(ctx, &currVariation, body.ID); err != nil {
+		return
+	}
+
+	// NO NEED TO HANDLE ERROR HERE BECAUSE VARIATION IS EXISTENT
+	helpers.DeleteByModel(ctx, currVariation)
+	helpers.JSONResponse(ctx, "")
+}

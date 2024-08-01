@@ -60,6 +60,7 @@ func CreateRoutes(r *gin.Engine) {
 	{
 		variations.POST("/get", controllers.GetVariations)
 		variations.POST("/update", controllers.UpdateVariations)
+		variations.POST("/delete", controllers.DeleteVariations)
 		variations.POST("/toggle", controllers.ToggleVariations)
 	}
 }
