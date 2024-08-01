@@ -113,9 +113,15 @@ func GetTableByModel(ctx *gin.Context, model interface{}, preload ...string) err
 }
 
 func GetCurrentByID(ctx *gin.Context, model interface{}, ID string) error {
-	if err := database.DB.Find(model, "id = ?", ID).Error; err != nil {
-		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return err
+	result := database.DB.Find(model, "id = ?", ID)
+	if result.Error != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, result.Error.Error())
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		ErrJSONResponse(ctx, http.StatusNotFound, "record not found")
+		return gorm.ErrRecordNotFound
 	}
 
 	return nil

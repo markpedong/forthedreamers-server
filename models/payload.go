@@ -23,11 +23,12 @@ type UserPayload struct {
 }
 
 type ProductVariationPayload struct {
-	ID       string `json:"id"`
-	Size     string `json:"size" validate:"required"`
-	Color    string `json:"color" validate:"required"`
-	Price    int    `json:"price" validate:"required"`
-	Quantity int    `json:"quantity" validate:"required"`
+	ID        string `json:"id"`
+	Size      string `json:"size" validate:"required"`
+	Color     string `json:"color" validate:"required"`
+	Price     int    `json:"price" validate:"required"`
+	Quantity  int    `json:"quantity" validate:"required"`
+	ProductID string `json:"product_id"`
 }
 
 type ProductPayload struct {

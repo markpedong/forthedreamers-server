@@ -59,6 +59,7 @@ func CreateRoutes(r *gin.Engine) {
 	variations.Use(middleware.Authentication)
 	{
 		variations.POST("/get", controllers.GetVariations)
+		variations.POST("/add", controllers.AddVariations)
 		variations.POST("/update", controllers.UpdateVariations)
 		variations.POST("/delete", controllers.DeleteVariations)
 		variations.POST("/toggle", controllers.ToggleVariations)
