@@ -43,6 +43,7 @@ func CreateRoutes(r *gin.Engine) {
 		products.POST("/add", controllers.AddProducts)
 		products.POST("/get", controllers.GetProducts)
 		products.POST("/update", controllers.UpdateProducts)
+		products.POST("/delete", controllers.DeleteProducts)
 	}
 
 	users := r.Group("/users")

@@ -24,7 +24,7 @@ type Users struct {
 type Collection struct {
 	ID        string                `json:"id" gorm:"primaryKey"`
 	Name      string                `json:"name" validate:"required"`
-	Images    pq.StringArray        `json:"images" gorm:"type:text[]"  validate:"required"`
+	Images    pq.StringArray        `json:"images" gorm:"type:text[]" validate:"required"`
 	Products  []Product             `json:"products" gorm:"foreignKey:CollectionID"`
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`

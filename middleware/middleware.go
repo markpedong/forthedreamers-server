@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/forthedreamers-server/controllers"
 	"github.com/forthedreamers-server/helpers"
+	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -52,7 +52,11 @@ func Authentication(ctx *gin.Context) {
 		ctx.Abort()
 	}
 
-	user := controllers.GetUserByID(claims["userID"].(string), ctx)
+	var user models.Users
+	if err := helpers.GetCurrentByID(ctx, &user, claims["userID"].(string)); err != nil {
+		return
+	}
+
 	if user.ID == "" {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Could not find the User")
 		ctx.Abort()

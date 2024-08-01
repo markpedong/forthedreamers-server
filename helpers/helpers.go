@@ -84,3 +84,56 @@ func GetTableByModelStatusON(ctx *gin.Context, model interface{}, preload ...str
 
 	return model
 }
+
+func CreateNewData(ctx *gin.Context, model interface{}) error {
+	if err := database.DB.Create(model).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func GetTableByModel(ctx *gin.Context, model interface{}, preload ...string) error {
+	query := database.DB.Order("created_at DESC")
+
+	if len(preload) > 0 {
+		for _, p := range preload {
+			query = query.Preload(p)
+		}
+	}
+
+	if err := query.Find(model).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func GetCurrentByID(ctx *gin.Context, model interface{}, ID string) error {
+	if err := database.DB.Find(model, "id = ?", ID).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func DeleteByModel(ctx *gin.Context, model interface{}) error {
+	if err := database.DB.Delete(model).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func UpdateByModel(ctx *gin.Context, model interface{}, newValues interface{}) error {
+	if err := database.DB.Model(model).Updates(newValues).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return err
+	}
+
+	return nil
+}

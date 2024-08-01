@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
@@ -11,12 +10,9 @@ import (
 
 func GetProducts(ctx *gin.Context) {
 	var products []models.Product
-	if err := database.DB.Preload("ProductVariations").Order("created_at DESC").Find(&products).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&products))
+	//NO NEED TO HANDLE ERROR BECAUSE PRODUCT IS EXISTENT
+	helpers.GetTableByModel(ctx, &products, "ProductVariations")
 }
 
 func AddProducts(ctx *gin.Context) {
@@ -48,9 +44,7 @@ func AddProducts(ctx *gin.Context) {
 	}
 
 	newProduct.ProductVariations = variations
-
-	if err := database.DB.Create(&newProduct).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := helpers.CreateNewData(ctx, &newProduct); err != nil {
 		return
 	}
 
@@ -64,20 +58,35 @@ func UpdateProducts(ctx *gin.Context) {
 	}
 
 	var currProduct models.Product
-	if err := database.DB.Find(&currProduct, "id = ?", body.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
 		return
 	}
 
-	if err := database.DB.Model(&currProduct).Updates(models.Product{
+	//NO NEED TO HANDLE ERROR BECAUSE PRODUCT IS EXISTENT
+	helpers.UpdateByModel(ctx, &currProduct, models.Product{
 		Name:         body.Name,
 		Images:       body.Images,
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
-	}).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	})
+	helpers.JSONResponse(ctx, "")
+}
+
+func DeleteProducts(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
+	var currProduct models.Product
+	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
+		return
+	}
+
+	// NO NEED TO HANDLE ERROR HERE BECAUSE CURRPRODUCT IS EXISTENT
+	helpers.DeleteByModel(ctx, &currProduct)
 	helpers.JSONResponse(ctx, "")
 }

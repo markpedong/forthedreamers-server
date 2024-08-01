@@ -1,9 +1,6 @@
 package controllers
 
 import (
-	"net/http"
-
-	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
@@ -26,8 +23,7 @@ func AddUsers(ctx *gin.Context) {
 		Username:  body.Username,
 		Password:  body.Password,
 	}
-	if err := database.DB.Create(&newUser).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := helpers.CreateNewData(ctx, &newUser); err != nil {
 		return
 	}
 
@@ -36,12 +32,9 @@ func AddUsers(ctx *gin.Context) {
 
 func GetUsers(ctx *gin.Context) {
 	var users []models.Users
-	if err := database.DB.Order("created_at DESC").Find(&users).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&users))
+	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
+	helpers.GetTableByModel(ctx, &users)
 }
 
 func UpdateUsers(ctx *gin.Context) {
@@ -50,9 +43,13 @@ func UpdateUsers(ctx *gin.Context) {
 		return
 	}
 
-	var currUser = GetUserByID(body.ID, ctx)
+	var currUser models.Users
+	if err := helpers.GetCurrentByID(ctx, &currUser, body.ID); err != nil {
+		return
+	}
 
-	if err := database.DB.Model(&currUser).Updates(models.Users{
+	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
+	helpers.UpdateByModel(ctx, &currUser, models.Users{
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 		Image:     body.Image,
@@ -61,20 +58,6 @@ func UpdateUsers(ctx *gin.Context) {
 		Email:     body.Email,
 		Username:  body.Username,
 		Password:  body.Password,
-	}).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
+	})
 	helpers.JSONResponse(ctx, "")
-}
-
-func GetUserByID(id string, ctx *gin.Context) *models.Users {
-	var currUser models.Users
-	if err := database.DB.Find(&currUser, "id = ?", id).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return nil
-	}
-
-	return &currUser
 }

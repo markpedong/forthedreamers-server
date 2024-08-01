@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
@@ -15,14 +14,17 @@ func AddCollection(ctx *gin.Context) {
 		return
 	}
 
+	if len(body.Images) < 1 {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "images is required")
+		return
+	}
+
 	newCollection := models.Collection{
 		ID:     helpers.NewUUID(),
 		Name:   body.Name,
 		Images: body.Images,
 	}
-
-	if err := database.DB.Create(&newCollection).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := helpers.CreateNewData(ctx, &newCollection); err != nil {
 		return
 	}
 
@@ -31,11 +33,9 @@ func AddCollection(ctx *gin.Context) {
 
 func GetCollection(ctx *gin.Context) {
 	var collections []models.Collection
-	if err := database.DB.Order("created_at DESC").Find(&collections).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
 
+	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
+	helpers.GetTableByModel(ctx, &collections)
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(&collections))
 }
 
@@ -46,16 +46,12 @@ func UpdateCollection(ctx *gin.Context) {
 	}
 
 	var currCollection models.Collection
-	if err := database.DB.Find(&currCollection, "id = ?", body.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := helpers.GetCurrentByID(ctx, &currCollection, body.ID); err != nil {
 		return
 	}
 
-	if err := database.DB.Model(&currCollection).Updates(models.Collection{Name: body.Name, Images: body.Images}).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
+	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
+	helpers.UpdateByModel(ctx, &currCollection, models.Collection{Name: body.Name, Images: body.Images})
 	helpers.JSONResponse(ctx, "")
 
 }
@@ -69,15 +65,11 @@ func DeleteCollection(ctx *gin.Context) {
 	}
 
 	var currCollection models.Collection
-	if err := database.DB.First(&currCollection, "id = ?", body.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := helpers.GetCurrentByID(ctx, &currCollection, body.ID); err != nil {
 		return
 	}
 
-	if err := database.DB.Delete(&currCollection).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
+	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
+	helpers.DeleteByModel(ctx, currCollection)
 	helpers.JSONResponse(ctx, "")
 }
