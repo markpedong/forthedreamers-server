@@ -35,6 +35,7 @@ func GetUsers(ctx *gin.Context) {
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
 	helpers.GetTableByModel(ctx, &users)
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(&users))
 }
 
 func UpdateUsers(ctx *gin.Context) {

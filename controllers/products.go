@@ -12,7 +12,8 @@ func GetProducts(ctx *gin.Context) {
 	var products []models.Product
 
 	//NO NEED TO HANDLE ERROR BECAUSE PRODUCT IS EXISTENT
-	helpers.GetTableByModel(ctx, &products, "ProductVariations")
+	helpers.GetTableByModel(ctx, &products)
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(products))
 }
 
 func AddProducts(ctx *gin.Context) {
