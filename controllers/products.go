@@ -30,21 +30,6 @@ func AddProducts(ctx *gin.Context) {
 		CollectionID: body.CollectionID,
 	}
 
-	var variations []models.ProductVariation
-	for _, v := range body.Variations {
-		variation := models.ProductVariation{
-			Size:      v.Size,
-			Color:     v.Color,
-			Price:     v.Price,
-			Quantity:  v.Quantity,
-			ID:        helpers.NewUUID(),
-			ProductID: newProduct.ID,
-		}
-
-		variations = append(variations, variation)
-	}
-
-	newProduct.ProductVariations = variations
 	if err := helpers.CreateNewData(ctx, &newProduct); err != nil {
 		return
 	}
@@ -89,5 +74,20 @@ func DeleteProducts(ctx *gin.Context) {
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE CURRPRODUCT IS EXISTENT
 	helpers.DeleteByModel(ctx, &currProduct)
+	helpers.JSONResponse(ctx, "")
+}
+
+func ToggleProducts(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"ID" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := helpers.ToggleModelByID(ctx, &models.Product{}, body.ID); err != nil {
+		return
+	}
+
 	helpers.JSONResponse(ctx, "")
 }

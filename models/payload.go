@@ -31,10 +31,9 @@ type ProductVariationPayload struct {
 }
 
 type ProductPayload struct {
-	ID           string                    `json:"id"`
-	Name         string                    `json:"name" validate:"required"`
-	Description  string                    `json:"Description" validate:"required"`
-	CollectionID string                    `json:"collection_id"`
-	Images       pq.StringArray            `json:"images" gorm:"type:text[]"  validate:"required"`
-	Variations   []ProductVariationPayload `json:"variations" validate:"required"`
+	ID           string         `json:"id"`
+	Name         string         `json:"name" validate:"required"`
+	Description  string         `json:"Description" validate:"required"`
+	CollectionID string         `json:"collection_id"`
+	Images       pq.StringArray `json:"images" gorm:"type:text[]"  validate:"required"`
 }
