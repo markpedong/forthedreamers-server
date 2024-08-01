@@ -59,5 +59,6 @@ func CreateRoutes(r *gin.Engine) {
 	{
 		variations.POST("/get", controllers.GetVariations)
 		variations.POST("/update", controllers.UpdateVariations)
+		variations.POST("/toggle", controllers.ToggleVariations)
 	}
 }

@@ -41,3 +41,18 @@ func UpdateVariations(ctx *gin.Context) {
 	helpers.UpdateByModel(ctx, &currVariation, models.ProductVariation{Size: body.Size, Color: body.Color, Price: body.Price, Quantity: body.Quantity})
 	helpers.JSONResponse(ctx, "")
 }
+
+func ToggleVariations(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"ID" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := helpers.ToggleModelByID(ctx, &models.ProductVariation{}, body.ID); err != nil {
+		return
+	}
+
+	helpers.JSONResponse(ctx, "")
+}

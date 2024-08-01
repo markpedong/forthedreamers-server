@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 var Validate = validator.New()
@@ -131,6 +132,18 @@ func DeleteByModel(ctx *gin.Context, model interface{}) error {
 
 func UpdateByModel(ctx *gin.Context, model interface{}, newValues interface{}) error {
 	if err := database.DB.Model(model).Updates(newValues).Error; err != nil {
+		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func ToggleModelByID(ctx *gin.Context, model interface{}, id string) error {
+	if err := database.DB.Model(model).
+		Where("id = ?", id).
+		Update("status", gorm.Expr("1 - status")).
+		Error; err != nil {
 		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return err
 	}
