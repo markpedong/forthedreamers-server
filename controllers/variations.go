@@ -71,6 +71,6 @@ func DeleteVariations(ctx *gin.Context) {
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE VARIATION IS EXISTENT
-	helpers.DeleteByModel(ctx, currVariation)
+	helpers.DeleteByModel(ctx, &currVariation)
 	helpers.JSONResponse(ctx, "")
 }

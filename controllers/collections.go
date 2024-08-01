@@ -70,6 +70,6 @@ func DeleteCollection(ctx *gin.Context) {
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
-	helpers.DeleteByModel(ctx, currCollection)
+	helpers.DeleteByModel(ctx, &currCollection)
 	helpers.JSONResponse(ctx, "")
 }
