@@ -9,6 +9,44 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func PublicProductDetails(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"product_id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+
+	var currProduct models.Product
+	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID, "Variations"); err != nil {
+		return
+	}
+
+	var productVariations []models.VariationResponse
+	for _, v := range currProduct.Variations {
+		newProductVariation := models.VariationResponse{
+			ID:       v.ID,
+			Size:     v.Size,
+			Color:    v.Color,
+			Price:    v.Price,
+			Quantity: v.Quantity,
+		}
+
+		productVariations = append(productVariations, newProductVariation)
+	}
+
+	transformedProduct := models.ProductResponse{
+		ID:           currProduct.ID,
+		Name:         currProduct.Name,
+		Description:  currProduct.Description,
+		CollectionID: currProduct.CollectionID,
+		Images:       currProduct.Images,
+		Varitions:    productVariations,
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedProduct))
+}
+
 func PublicProducts(ctx *gin.Context) {
 	var products []models.Product
 	helpers.GetTableByModelStatusON(ctx, &products, "Variations")

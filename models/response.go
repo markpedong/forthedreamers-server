@@ -3,7 +3,7 @@ package models
 type ProductResponse struct {
 	ID           string              `json:"id"`
 	Name         string              `json:"name"`
-	Description  string              `json:"Description"`
+	Description  string              `json:"description"`
 	CollectionID string              `json:"collection_id"`
 	Images       []string            `json:"images"`
 	Varitions    []VariationResponse `json:"variations"`

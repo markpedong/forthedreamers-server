@@ -112,8 +112,15 @@ func GetTableByModel(ctx *gin.Context, model interface{}, preload ...string) err
 	return nil
 }
 
-func GetCurrentByID(ctx *gin.Context, model interface{}, ID string) error {
-	result := database.DB.Find(model, "id = ?", ID)
+func GetCurrentByID(ctx *gin.Context, model interface{}, ID string, preload ...string) error {
+	query := database.DB
+	if len(preload) > 0 {
+		for _, p := range preload {
+			query = query.Preload(p)
+		}
+	}
+
+	result := query.Find(model, "id = ?", ID)
 	if result.Error != nil {
 		ErrJSONResponse(ctx, http.StatusInternalServerError, result.Error.Error())
 		return result.Error
