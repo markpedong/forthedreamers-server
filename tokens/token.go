@@ -28,8 +28,9 @@ func SetCookie(ctx *gin.Context, token string) {
 		Name:     "Auth",
 		Value:    token,
 		Path:     "/",
+		Domain:   "",
 		HttpOnly: false,
 		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 	})
 }
