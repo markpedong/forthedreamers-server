@@ -8,6 +8,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func PublicProducts(ctx *gin.Context) {
+	var products []models.Product
+	helpers.GetTableByModelStatusON(ctx, &products, "Variations")
+
+	var productResponse []models.ProductResponse
+	for _, v := range products {
+		var variations []models.VariationResponse
+		for _, q := range v.Variations {
+			newVariation := models.VariationResponse{
+				ID:       q.ID,
+				Size:     q.Size,
+				Color:    q.Color,
+				Price:    q.Price,
+				Quantity: q.Quantity,
+			}
+			variations = append(variations, newVariation)
+		}
+
+		newProductResponse := models.ProductResponse{
+			ID:           v.ID,
+			Name:         v.Name,
+			CollectionID: v.CollectionID,
+			Images:       v.Images,
+			Description:  v.Description,
+			Varitions:    variations,
+		}
+
+		productResponse = append(productResponse, newProductResponse)
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(productResponse))
+}
+
 func GetProducts(ctx *gin.Context) {
 	var products []models.Product
 
