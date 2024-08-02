@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
@@ -60,5 +62,38 @@ func UpdateUsers(ctx *gin.Context) {
 		Username:  body.Username,
 		Password:  body.Password,
 	})
+	helpers.JSONResponse(ctx, "")
+}
+
+func DeleteUsers(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+
+	var currUser models.Users
+	if err := helpers.GetCurrentByID(ctx, &currUser, body.ID); err != nil {
+		return
+	}
+
+	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
+	helpers.DeleteByModel(ctx, &currUser)
+	helpers.JSONResponse(ctx, "")
+}
+
+func ToggleUsers(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"ID" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := helpers.ToggleModelByID(ctx, &models.Users{}, body.ID); err != nil {
+		return
+	}
+
 	helpers.JSONResponse(ctx, "")
 }
