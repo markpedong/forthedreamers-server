@@ -24,6 +24,7 @@ func AddUsers(ctx *gin.Context) {
 		Image:     body.Image,
 		Username:  body.Username,
 		Password:  body.Password,
+		Role:      body.Role,
 	}
 	if err := helpers.CreateNewData(ctx, &newUser); err != nil {
 		return
@@ -61,6 +62,7 @@ func UpdateUsers(ctx *gin.Context) {
 		Email:     body.Email,
 		Username:  body.Username,
 		Password:  body.Password,
+		Role:      body.Role,
 	})
 	helpers.JSONResponse(ctx, "")
 }

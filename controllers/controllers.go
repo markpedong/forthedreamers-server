@@ -50,6 +50,19 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
+	origin := ctx.GetHeader("Origin")
+	if origin == "https://forthedreamers.vercel.app" {
+		if existingUser.Status == 0 {
+			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot login this user, contact admin")
+			return
+		}
+	} else {
+		if existingUser.Role == "USER" {
+			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot access this website")
+			return
+		}
+	}
+
 	token, err := tokens.CreateAndSignJWT(&existingUser)
 	if err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())

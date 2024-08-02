@@ -20,6 +20,7 @@ type UserPayload struct {
 	Email     string `json:"email" validate:"required"`
 	Username  string `json:"username" validate:"required"`
 	Password  string `json:"password" validate:"required"`
+	Role      string `json:"role" validate:"required"`
 }
 
 type ProductVariationPayload struct {
