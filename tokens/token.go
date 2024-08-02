@@ -30,6 +30,6 @@ func SetCookie(ctx *gin.Context, token string) {
 		Path:     "/",
 		HttpOnly: false,
 		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 }
