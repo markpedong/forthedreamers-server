@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
@@ -103,6 +104,15 @@ func DeleteProducts(ctx *gin.Context) {
 	var currProduct models.Product
 	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
 		return
+	}
+
+	var variations []models.ProductVariation
+	if err := database.DB.Find(&variations, "product_id = ?", currProduct.ID).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	for _, v := range variations {
+		helpers.DeleteByModel(ctx, &v)
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE CURRPRODUCT IS EXISTENT
