@@ -6,7 +6,7 @@ type ProductResponse struct {
 	Description  string              `json:"description"`
 	CollectionID string              `json:"collection_id"`
 	Images       []string            `json:"images"`
-	Varitions    []VariationResponse `json:"variations"`
+	Varitions    []VariationResponse `json:"-"`
 }
 
 type VariationResponse struct {

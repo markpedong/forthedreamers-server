@@ -100,6 +100,7 @@ func AddProducts(ctx *gin.Context) {
 		Images:       body.Images,
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
+		Features:     body.Features,
 	}
 
 	if err := helpers.CreateNewData(ctx, &newProduct); err != nil {
@@ -126,6 +127,7 @@ func UpdateProducts(ctx *gin.Context) {
 		Images:       body.Images,
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
+		Features:     body.Features,
 	})
 	helpers.JSONResponse(ctx, "")
 }
