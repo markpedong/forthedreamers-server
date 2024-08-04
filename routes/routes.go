@@ -22,6 +22,7 @@ func CreateRoutes(r *gin.Engine) {
 		public.POST("/login", controllers.Login)
 		public.GET("/products", controllers.PublicProducts)
 		public.POST("/products/details", controllers.PublicProductDetails)
+		public.POST("/products/variations", controllers.PublicVariations)
 	}
 
 	api := r.Group("/api")

@@ -9,6 +9,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func PublicVariations(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"product_id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+
+	var currVariations []models.ProductVariation
+	if err := database.DB.Where("status = ?", 1).Order("created_at DESC").Find(&currVariations, "product_id = ?", body.ID).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var productVariations []models.VariationResponse
+	for _, v := range currVariations {
+		newProductVariation := models.VariationResponse{
+			ID:       v.ID,
+			Size:     v.Size,
+			Color:    v.Color,
+			Price:    v.Price,
+			Quantity: v.Quantity,
+		}
+
+		productVariations = append(productVariations, newProductVariation)
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(productVariations))
+}
+
 func PublicProductDetails(ctx *gin.Context) {
 	var body struct {
 		ID string `json:"product_id" validate:"required"`
@@ -22,26 +52,13 @@ func PublicProductDetails(ctx *gin.Context) {
 		return
 	}
 
-	var productVariations []models.VariationResponse
-	for _, v := range currProduct.Variations {
-		newProductVariation := models.VariationResponse{
-			ID:       v.ID,
-			Size:     v.Size,
-			Color:    v.Color,
-			Price:    v.Price,
-			Quantity: v.Quantity,
-		}
-
-		productVariations = append(productVariations, newProductVariation)
-	}
-
 	transformedProduct := models.ProductResponse{
 		ID:           currProduct.ID,
 		Name:         currProduct.Name,
 		Description:  currProduct.Description,
 		CollectionID: currProduct.CollectionID,
 		Images:       currProduct.Images,
-		Varitions:    productVariations,
+		Features:     currProduct.Features,
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedProduct))
@@ -53,25 +70,13 @@ func PublicProducts(ctx *gin.Context) {
 
 	var productResponse []models.ProductResponse
 	for _, v := range products {
-		var variations []models.VariationResponse
-		for _, q := range v.Variations {
-			newVariation := models.VariationResponse{
-				ID:       q.ID,
-				Size:     q.Size,
-				Color:    q.Color,
-				Price:    q.Price,
-				Quantity: q.Quantity,
-			}
-			variations = append(variations, newVariation)
-		}
-
 		newProductResponse := models.ProductResponse{
 			ID:           v.ID,
 			Name:         v.Name,
 			CollectionID: v.CollectionID,
 			Images:       v.Images,
 			Description:  v.Description,
-			Varitions:    variations,
+			Features:     v.Features,
 		}
 
 		productResponse = append(productResponse, newProductResponse)

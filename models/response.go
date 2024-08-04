@@ -1,12 +1,12 @@
 package models
 
 type ProductResponse struct {
-	ID           string              `json:"id"`
-	Name         string              `json:"name"`
-	Description  string              `json:"description"`
-	CollectionID string              `json:"collection_id"`
-	Images       []string            `json:"images"`
-	Varitions    []VariationResponse `json:"-"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	CollectionID string   `json:"collection_id"`
+	Images       []string `json:"images"`
+	Features     []string `json:"features"`
 }
 
 type VariationResponse struct {
