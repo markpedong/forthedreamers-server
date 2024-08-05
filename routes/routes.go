@@ -20,7 +20,7 @@ func CreateRoutes(r *gin.Engine) {
 	public := r.Group("/public")
 	{
 		public.POST("/login", controllers.Login)
-		public.GET("/products", controllers.PublicProducts)
+		public.POST("/products", controllers.PublicProducts)
 		public.POST("/products/details", controllers.PublicProductDetails)
 		public.POST("/products/variations", controllers.PublicVariations)
 	}

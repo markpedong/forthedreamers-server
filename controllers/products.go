@@ -7,6 +7,7 @@ import (
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func PublicVariations(ctx *gin.Context) {
@@ -65,27 +66,51 @@ func PublicProductDetails(ctx *gin.Context) {
 }
 
 func PublicProducts(ctx *gin.Context) {
-	var products []models.Product
-	helpers.GetTableByModelStatusON(ctx, &products, "Variations")
-
-	var productResponse []models.ProductResponse
-	for _, v := range products {
-		var variations []models.VariationResponse2
-		if err := database.DB.Model(models.ProductVariation{}).Select("id", "color", "price").Find(&variations, "product_id = ?", v.ID).Error; err != nil {
-			return
-		}
-
-		newProductResponse := models.ProductResponse{
-			ID:         v.ID,
-			Name:       v.Name,
-			Images:     v.Images,
-			Variations: variations,
-		}
-
-		productResponse = append(productResponse, newProductResponse)
+	var body struct {
+		Search string `json:"search"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(productResponse))
+	var products []models.Product
+	if err := database.DB.
+		Where("name ILIKE ? AND status = ?", "%"+body.Search+"%", 1).
+		Preload("Variations", func(db *gorm.DB) *gorm.DB {
+			return db.
+				Where("status = ?", 1).
+				Order("created_at DESC").
+				Select("id", "size", "color", "price", "product_id")
+		}).
+		Find(&products).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var responseProducts []models.ProductResponse
+	for _, product := range products {
+		var variations []models.VariationResponse
+		for _, v := range product.Variations {
+			variations = append(variations, models.VariationResponse{
+				ID:    v.ID,
+				Size:  v.Size,
+				Color: v.Color,
+				Price: v.Price,
+			})
+		}
+
+		responseProducts = append(responseProducts, models.ProductResponse{
+			ID:           product.ID,
+			Name:         product.Name,
+			Description:  product.Description,
+			CollectionID: product.CollectionID,
+			Images:       product.Images,
+			Features:     product.Features,
+			Variations:   variations,
+		})
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(responseProducts))
 }
 
 func GetProducts(ctx *gin.Context) {

@@ -69,22 +69,22 @@ func BindValidateJSON(ctx *gin.Context, body interface{}) error {
 	return nil
 }
 
-func GetTableByModelStatusON(ctx *gin.Context, model interface{}, preload ...string) interface{} {
-	query := database.DB.Where("status = ?", 1).Order("created_at DESC")
+// func GetTableByModelStatusON(ctx *gin.Context, model interface{}, preload ...string) interface{} {
+// 	query := database.DB.Where("status = ?", 1).Order("created_at DESC")
 
-	if len(preload) > 0 {
-		for _, p := range preload {
-			query = query.Preload(p)
-		}
-	}
+// 	if len(preload) > 0 {
+// 		for _, p := range preload {
+// 			query = query.Preload(p)
+// 		}
+// 	}
 
-	if err := query.Find(model).Error; err != nil {
-		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return nil
-	}
+// 	if err := query.Find(model).Error; err != nil {
+// 		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+// 		return nil
+// 	}
 
-	return model
-}
+// 	return model
+// }
 
 func CreateNewData(ctx *gin.Context, model interface{}) error {
 	if err := database.DB.Create(model).Error; err != nil {

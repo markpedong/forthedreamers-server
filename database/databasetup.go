@@ -29,6 +29,7 @@ func ConnectDB() {
 		&models.Collection{},
 		&models.Product{},
 		&models.ProductVariation{},
+		&models.WebsiteData{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())

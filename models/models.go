@@ -51,11 +51,24 @@ type Product struct {
 	Name         string                `json:"name" validate:"required"`
 	Description  string                `json:"description" validate:"required"`
 	CollectionID string                `json:"collection_id"`
-	Variations   []ProductVariation    `json:"-" gorm:"foreignKey:ProductID"`
-	Images       pq.StringArray        `json:"images" gorm:"type:text[]"  validate:"required"`
-	Features     pq.StringArray        `json:"features" gorm:"type:text[]"  validate:"required"`
+	Variations   []ProductVariation    `json:"variations" gorm:"foreignKey:ProductID"`
+	Images       pq.StringArray        `json:"images" gorm:"type:text[]"`
+	Features     pq.StringArray        `json:"features" gorm:"type:text[]"`
 	CreatedAt    int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt    int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt    soft_delete.DeletedAt `json:"-"`
 	Status       int                   `json:"status" gorm:"default:0"`
+}
+
+type WebsiteData struct {
+	ID            string                `json:"id" gorm:"primaryKey"`
+	WebsiteName   string                `json:"website_name" validate:"required"`
+	PromoText     string                `json:"promo_text" validate:"required"`
+	MarqueeText   string                `json:"marquee_text" validate:"required"`
+	LandingImage1 string                `json:"landing_image1" validate:"required"`
+	LandingImage2 string                `json:"landing_image2" validate:"required"`
+	LandingImage3 string                `json:"landing_image3" validate:"required"`
+	CreatedAt     int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt     int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt     soft_delete.DeletedAt `json:"-"`
 }
