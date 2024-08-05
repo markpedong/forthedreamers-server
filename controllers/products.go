@@ -53,16 +53,15 @@ func PublicProductDetails(ctx *gin.Context) {
 		return
 	}
 
-	transformedProduct := models.ProductResponse{
-		ID:           currProduct.ID,
-		Name:         currProduct.Name,
-		Description:  currProduct.Description,
-		CollectionID: currProduct.CollectionID,
-		Images:       currProduct.Images,
-		Features:     currProduct.Features,
+	filteredProduct := map[string]interface{}{
+		"id":          currProduct.ID,
+		"name":        currProduct.Name,
+		"description": currProduct.Description,
+		"images":      currProduct.Images,
+		"features":    currProduct.Features,
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedProduct))
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(filteredProduct))
 }
 
 func PublicProducts(ctx *gin.Context) {
@@ -100,12 +99,11 @@ func PublicProducts(ctx *gin.Context) {
 		}
 
 		filteredProduct := map[string]interface{}{
-			"id":            product.ID,
-			"name":          product.Name,
-			"description":   product.Description,
-			"collection_id": product.CollectionID,
-			"images":        product.Images,
-			"variations":    filteredVariations,
+			"id":          product.ID,
+			"name":        product.Name,
+			"description": product.Description,
+			"images":      product.Images,
+			"variations":  filteredVariations,
 		}
 		filteredProducts = append(filteredProducts, filteredProduct)
 	}
