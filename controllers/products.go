@@ -49,7 +49,7 @@ func PublicProductDetails(ctx *gin.Context) {
 	}
 
 	var currProduct models.Product
-	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID, "Variations"); err != nil {
+	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
 		return
 	}
 
