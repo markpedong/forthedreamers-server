@@ -51,7 +51,7 @@ type Product struct {
 	Name         string                `json:"name" validate:"required"`
 	Description  string                `json:"description" validate:"required"`
 	CollectionID string                `json:"collection_id"`
-	Variations   []ProductVariation    `json:"variations" gorm:"foreignKey:ProductID"`
+	Variations   []ProductVariation    `json:"-" gorm:"foreignKey:ProductID"`
 	Images       pq.StringArray        `json:"images" gorm:"type:text[]"  validate:"required"`
 	Features     pq.StringArray        `json:"features" gorm:"type:text[]"  validate:"required"`
 	CreatedAt    int                   `json:"created_at" gorm:"autoCreateTime"`

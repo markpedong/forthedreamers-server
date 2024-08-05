@@ -70,13 +70,16 @@ func PublicProducts(ctx *gin.Context) {
 
 	var productResponse []models.ProductResponse
 	for _, v := range products {
+		var variations []models.VariationResponse2
+		if err := database.DB.Model(models.ProductVariation{}).Select("id", "color", "price").Find(&variations, "product_id = ?", v.ID).Error; err != nil {
+			return
+		}
+
 		newProductResponse := models.ProductResponse{
-			ID:           v.ID,
-			Name:         v.Name,
-			CollectionID: v.CollectionID,
-			Images:       v.Images,
-			Description:  v.Description,
-			Features:     v.Features,
+			ID:         v.ID,
+			Name:       v.Name,
+			Images:     v.Images,
+			Variations: variations,
 		}
 
 		productResponse = append(productResponse, newProductResponse)
