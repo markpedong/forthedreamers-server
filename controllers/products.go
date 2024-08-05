@@ -79,8 +79,7 @@ func PublicProducts(ctx *gin.Context) {
 		Preload("Variations", func(db *gorm.DB) *gorm.DB {
 			return db.
 				Where("status = ?", 1).
-				Order("created_at DESC").
-				Select("id", "color", "price", "product_id")
+				Order("created_at DESC")
 		}).
 		Find(&products).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
