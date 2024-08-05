@@ -69,4 +69,10 @@ func CreateRoutes(r *gin.Engine) {
 		variations.POST("/delete", controllers.DeleteVariations)
 		variations.POST("/toggle", controllers.ToggleVariations)
 	}
+
+	website := r.Group("/website")
+	website.Use(middleware.Authentication)
+	{
+		website.GET("/get", controllers.GetWebsiteData)
+	}
 }
