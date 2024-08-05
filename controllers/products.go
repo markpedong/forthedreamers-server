@@ -80,37 +80,38 @@ func PublicProducts(ctx *gin.Context) {
 			return db.
 				Where("status = ?", 1).
 				Order("created_at DESC").
-				Select("id", "size", "color", "price", "product_id")
+				Select("id", "color", "price", "product_id")
 		}).
 		Find(&products).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	var responseProducts []models.ProductResponse
+	var filteredProducts []map[string]interface{}
 	for _, product := range products {
-		var variations []models.VariationResponse
-		for _, v := range product.Variations {
-			variations = append(variations, models.VariationResponse{
-				ID:    v.ID,
-				Size:  v.Size,
-				Color: v.Color,
-				Price: v.Price,
-			})
+		var filteredVariations []map[string]interface{}
+		for _, w := range product.Variations {
+			variation := map[string]interface{}{
+				"id":    w.ID,
+				"size":  w.Size,
+				"color": w.Color,
+				"price": w.Price,
+			}
+			filteredVariations = append(filteredVariations, variation)
 		}
 
-		responseProducts = append(responseProducts, models.ProductResponse{
-			ID:           product.ID,
-			Name:         product.Name,
-			Description:  product.Description,
-			CollectionID: product.CollectionID,
-			Images:       product.Images,
-			Features:     product.Features,
-			Variations:   variations,
-		})
+		filteredProduct := map[string]interface{}{
+			"id":            product.ID,
+			"name":          product.Name,
+			"description":   product.Description,
+			"collection_id": product.CollectionID,
+			"images":        product.Images,
+			"variations":    filteredVariations,
+		}
+		filteredProducts = append(filteredProducts, filteredProduct)
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(responseProducts))
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(filteredProducts))
 }
 
 func GetProducts(ctx *gin.Context) {
