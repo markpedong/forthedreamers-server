@@ -34,3 +34,23 @@ func UpdateWebsiteData(ctx *gin.Context) {
 
 	helpers.JSONResponse(ctx, "")
 }
+
+func PublicWebsite(ctx *gin.Context) {
+	var website models.WebsiteData
+
+	if err := database.DB.First(&website).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	transformedResponse := map[string]interface{}{
+		"website_name":   website.WebsiteName,
+		"promo_text":     website.PromoText,
+		"marquee_text":   website.MarqueeText,
+		"landing_image1": website.LandingImage1,
+		"landing_image2": website.LandingImage2,
+		"landing_image3": website.LandingImage3,
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedResponse))
+}
