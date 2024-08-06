@@ -74,5 +74,6 @@ func CreateRoutes(r *gin.Engine) {
 	website.Use(middleware.Authentication)
 	{
 		website.GET("/get", controllers.GetWebsiteData)
+		website.POST("/update", controllers.UpdateWebsiteData)
 	}
 }

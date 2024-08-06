@@ -19,3 +19,18 @@ func GetWebsiteData(ctx *gin.Context) {
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(website))
 }
+
+func UpdateWebsiteData(ctx *gin.Context) {
+	var website models.WebsiteData
+	if err := helpers.BindValidateJSON(ctx, &website); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := database.DB.Updates(&website).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(ctx, "")
+}
