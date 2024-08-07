@@ -10,9 +10,27 @@ import (
 )
 
 func PublicCollections(ctx *gin.Context) {
-	var collections []models.Collection
+	var body struct {
+		Search   string `json:"search"`
+		PageSize int    `json:"page_size"`
+		Page     int    `json:"page"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+	if body.Page == 0 {
+		body.Page = 1
+	}
 
-	if err := database.DB.Find(&collections).Where("status = ?", 1).Error; err != nil {
+	if body.PageSize == 0 {
+		body.PageSize = 1
+	}
+
+	var collections []models.Collection
+	if err := database.DB.
+		Limit(body.PageSize).
+		Offset((body.Page-1)*body.PageSize).
+		Find(&collections).Where("status = ?", 1).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

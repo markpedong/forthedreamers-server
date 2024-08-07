@@ -38,6 +38,7 @@ func UpdateWebsiteData(ctx *gin.Context) {
 func PublicWebsite(ctx *gin.Context) {
 	var website models.WebsiteData
 	var products []models.Product
+	var collections []models.Collection
 
 	if err := database.DB.First(&website).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
@@ -47,17 +48,22 @@ func PublicWebsite(ctx *gin.Context) {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+	if err := database.DB.Find(&collections).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	transformedResponse := map[string]interface{}{
-		"website_name":     website.WebsiteName,
-		"promo_text":       website.PromoText,
-		"marquee_text":     website.MarqueeText,
-		"landing_image1":   website.LandingImage1,
-		"landing_image2":   website.LandingImage2,
-		"landing_image3":   website.LandingImage3,
-		"news_text":        website.NewsText,
-		"product_length":   len(products),
-		"default_pageSize": website.DefaultPageSize,
+		"website_name":      website.WebsiteName,
+		"promo_text":        website.PromoText,
+		"marquee_text":      website.MarqueeText,
+		"landing_image1":    website.LandingImage1,
+		"landing_image2":    website.LandingImage2,
+		"landing_image3":    website.LandingImage3,
+		"news_text":         website.NewsText,
+		"product_length":    len(products),
+		"default_pageSize":  website.DefaultPageSize,
+		"collection_length": len(collections),
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedResponse))
