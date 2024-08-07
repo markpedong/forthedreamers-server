@@ -11,11 +11,10 @@ import (
 
 func PublicCollections(ctx *gin.Context) {
 	var body struct {
-		Search   string `form:"search" json:"search"`
-		PageSize int    `json:"page_size"`
-		Page     int    `form:"page" json:"page"`
+		PageSize int `json:"page_size"`
+		Page     int `form:"page" json:"page"`
 	}
-	if err := ctx.ShouldBindQuery(&body); err != nil {
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -30,8 +29,8 @@ func PublicCollections(ctx *gin.Context) {
 	var collections []models.Collection
 	if err := database.DB.
 		Where("status = ?", 1).
-		Limit(1).
-		Offset((body.Page - 1) * 1).
+		Limit(body.PageSize).
+		Offset((body.Page - 1) * body.PageSize).
 		Find(&collections).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
@@ -113,5 +112,20 @@ func DeleteCollection(ctx *gin.Context) {
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
 	helpers.DeleteByModel(ctx, &currCollection)
+	helpers.JSONResponse(ctx, "")
+}
+
+func ToggleCollections(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"ID" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := helpers.ToggleModelByID(ctx, &models.Collection{}, body.ID); err != nil {
+		return
+	}
+
 	helpers.JSONResponse(ctx, "")
 }
