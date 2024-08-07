@@ -61,15 +61,16 @@ type Product struct {
 }
 
 type WebsiteData struct {
-	ID            string                `json:"id" gorm:"primaryKey"`
-	WebsiteName   string                `json:"website_name" validate:"required"`
-	PromoText     string                `json:"promo_text" validate:"required"`
-	MarqueeText   string                `json:"marquee_text" validate:"required"`
-	NewsText      string                `json:"news_text" validate:"required"`
-	LandingImage1 string                `json:"landing_image1" validate:"required"`
-	LandingImage2 string                `json:"landing_image2" validate:"required"`
-	LandingImage3 string                `json:"landing_image3" validate:"required"`
-	CreatedAt     int                   `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt     int                   `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt     soft_delete.DeletedAt `json:"-"`
+	ID              string                `json:"id" gorm:"primaryKey"`
+	WebsiteName     string                `json:"website_name" validate:"required"`
+	PromoText       string                `json:"promo_text" validate:"required"`
+	MarqueeText     string                `json:"marquee_text" validate:"required"`
+	NewsText        string                `json:"news_text" validate:"required"`
+	LandingImage1   string                `json:"landing_image1" validate:"required"`
+	LandingImage2   string                `json:"landing_image2" validate:"required"`
+	LandingImage3   string                `json:"landing_image3" validate:"required"`
+	DefaultPageSize int                   `json:"default_pageSize" validate:"required"`
+	CreatedAt       int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt       int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt       soft_delete.DeletedAt `json:"-"`
 }

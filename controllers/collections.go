@@ -3,11 +3,33 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
 )
 
+func PublicCollections(ctx *gin.Context) {
+	var collections []models.Collection
+
+	if err := database.DB.Find(&collections).Where("status = ?", 1).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	transformedCollections := []map[string]interface{}{}
+	for _, v := range collections {
+		newCollection := map[string]interface{}{
+			"id":     v.ID,
+			"name":   v.Name,
+			"images": v.Images,
+		}
+
+		transformedCollections = append(transformedCollections, newCollection)
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedCollections))
+}
 func AddCollection(ctx *gin.Context) {
 	var body models.CollectionPayload
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
