@@ -50,6 +50,7 @@ func PublicWebsite(ctx *gin.Context) {
 		"landing_image1": website.LandingImage1,
 		"landing_image2": website.LandingImage2,
 		"landing_image3": website.LandingImage3,
+		"news_text":      website.NewsText,
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedResponse))
