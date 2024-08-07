@@ -23,7 +23,7 @@ func PublicCollections(ctx *gin.Context) {
 	}
 
 	if body.PageSize == 0 {
-		body.PageSize = 1
+		body.PageSize = 10
 	}
 
 	var collections []models.Collection
