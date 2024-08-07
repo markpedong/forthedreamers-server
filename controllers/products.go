@@ -36,14 +36,23 @@ func PublicProductDetails(ctx *gin.Context) {
 
 func PublicProducts(ctx *gin.Context) {
 	var body struct {
-		Search string `json:"search"`
+		Search     string `json:"search"`
+		PageSize   int    `json:"page_size"`
+		PageNumber int    `json:"page"`
 	}
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
 		return
 	}
 
+	// if body.PageNumber == 0 {
+	// }
+	// if body.PageSize == 0 {
+	// }
+
 	var products []models.Product
 	if err := database.DB.
+		Limit(body.PageSize).
+		Offset((body.PageNumber-1)*body.PageSize).
 		Where("name ILIKE ? AND status = ?", "%"+body.Search+"%", 1).
 		Preload("Variations", func(db *gorm.DB) *gorm.DB {
 			return db.
