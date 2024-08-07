@@ -11,11 +11,12 @@ import (
 
 func PublicCollections(ctx *gin.Context) {
 	var body struct {
-		Search   string `json:"search"`
+		Search   string `form:"search" json:"search"`
 		PageSize int    `json:"page_size"`
-		Page     int    `json:"page"`
+		Page     int    `form:"page" json:"page"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := ctx.ShouldBindQuery(&body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if body.Page == 0 {
@@ -28,9 +29,10 @@ func PublicCollections(ctx *gin.Context) {
 
 	var collections []models.Collection
 	if err := database.DB.
-		Limit(body.PageSize).
-		Offset((body.Page-1)*body.PageSize).
-		Find(&collections).Where("status = ?", 1).Error; err != nil {
+		Where("status = ?", 1).
+		Limit(1).
+		Offset((body.Page - 1) * 1).
+		Find(&collections).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -31,6 +31,7 @@ type Collection struct {
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`
+	Status    int                   `json:"status" gorm:"default:0"`
 }
 
 type ProductVariation struct {
