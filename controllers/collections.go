@@ -189,5 +189,6 @@ func GetCollectionByID(ctx *gin.Context) {
 		"images":   collection.Images,
 		"products": filteredProducts,
 	}
+
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(newCollection))
 }
