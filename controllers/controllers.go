@@ -69,18 +69,12 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	tokens.SetCookie(ctx, token)
 	userRes := map[string]interface{}{
 		"token":    token,
 		"userInfo": existingUser,
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
-}
-
-func Logout(ctx *gin.Context) {
-	ctx.SetCookie("Auth", "deleted", 0, "", "", false, true)
-	ctx.Redirect(http.StatusFound, "/")
 }
 
 func UploadImage(ctx *gin.Context) {
