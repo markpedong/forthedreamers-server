@@ -28,7 +28,7 @@ func SetCookie(ctx *gin.Context, token string) {
 		Name:     "Auth",
 		Value:    token,
 		Path:     "/",
-		Domain:   "",
+		Domain:   "https://forthedreamers-admin.vercel.app",
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
