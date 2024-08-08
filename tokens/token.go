@@ -1,6 +1,7 @@
 package tokens
 
 import (
+	"net/http"
 	"os"
 	"time"
 
@@ -20,5 +21,15 @@ func CreateAndSignJWT(user *models.Users) (string, error) {
 }
 
 func SetCookie(ctx *gin.Context, token string) {
-	ctx.SetCookie("Auth", token, 3600*24, "/", "", true, true)
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "Auth",
+		Value:    token,
+		Path:     "/",
+		Domain:   "",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	ctx.Request.Header.Add("Cookie", "Auth="+token)
 }
