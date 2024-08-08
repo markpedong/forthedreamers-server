@@ -7,6 +7,7 @@ import (
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func PublicCollections(ctx *gin.Context) {
@@ -49,6 +50,7 @@ func PublicCollections(ctx *gin.Context) {
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedCollections))
 }
+
 func AddCollection(ctx *gin.Context) {
 	var body models.CollectionPayload
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
@@ -128,4 +130,64 @@ func ToggleCollections(ctx *gin.Context) {
 	}
 
 	helpers.JSONResponse(ctx, "")
+}
+
+func GetCollectionByID(ctx *gin.Context) {
+	var body struct {
+		ID string `json:"id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var collection models.Collection
+	if err := database.DB.Where("status = ?", 1).First(&collection, "id = ?", body.ID).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var collectionsProducts []models.Product
+	if err := database.DB.
+		Preload("Variations", func(db *gorm.DB) *gorm.DB {
+			return db.
+				Where("status = ?", 1).
+				Order("created_at DESC")
+		}).
+		Find(&collectionsProducts, "collection_id = ?", collection.ID).
+		Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var filteredProducts []map[string]interface{}
+	for _, product := range collectionsProducts {
+		var filteredVariations []map[string]interface{}
+		for _, w := range product.Variations {
+			variation := map[string]interface{}{
+				"id":    w.ID,
+				"size":  w.Size,
+				"color": w.Color,
+				"price": w.Price,
+			}
+			filteredVariations = append(filteredVariations, variation)
+		}
+
+		filteredProduct := map[string]interface{}{
+			"id":          product.ID,
+			"name":        product.Name,
+			"description": product.Description,
+			"images":      product.Images,
+			"variations":  filteredVariations,
+		}
+		filteredProducts = append(filteredProducts, filteredProduct)
+	}
+
+	newCollection := map[string]interface{}{
+		"id":       collection.ID,
+		"name":     collection.Name,
+		"images":   collection.Images,
+		"products": filteredProducts,
+	}
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(newCollection))
 }
