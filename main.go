@@ -23,10 +23,12 @@ func CorsMiddleware() gin.HandlerFunc {
 		}
 
 		origin := ctx.Request.Header.Get("Origin")
-		for _, allowedOrigin := range allowedOrigins {
-			if origin == allowedOrigin {
-				ctx.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-				break
+		if origin != "" {
+			for _, allowedOrigin := range allowedOrigins {
+				if origin == allowedOrigin {
+					ctx.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+					break
+				}
 			}
 		}
 
