@@ -16,13 +16,7 @@ import (
 )
 
 func Authentication(ctx *gin.Context) {
-	tokenStr, err := ctx.Cookie("Auth")
-	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
-		ctx.Abort()
-		return
-	}
-
+	tokenStr := ctx.Request.Header.Get("Token")
 	if tokenStr == "" {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Token is missing")
 		ctx.Abort()
