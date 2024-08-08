@@ -30,6 +30,7 @@ func ConnectDB() {
 		&models.Product{},
 		&models.ProductVariation{},
 		&models.WebsiteData{},
+		&models.Testimonials{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())

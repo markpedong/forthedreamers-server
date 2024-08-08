@@ -75,3 +75,13 @@ type WebsiteData struct {
 	UpdatedAt       int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt       soft_delete.DeletedAt `json:"-"`
 }
+
+type Testimonials struct {
+	ID        string                `json:"id" gorm:"primaryKey"`
+	Title     string                `json:"title" validate:"required"`
+	Author    string                `json:"author" validate:"required"`
+	Status    int                   `json:"status" gorm:"default:0"`
+	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt soft_delete.DeletedAt `json:"-"`
+}
