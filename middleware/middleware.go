@@ -39,27 +39,33 @@ func Authentication(ctx *gin.Context) {
 	if err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
 		ctx.Abort()
+		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT Claims failed")
 		ctx.Abort()
+		return
 	}
 
 	if claims["ttl"].(float64) < float64(time.Now().Unix()) {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT token expired")
 		ctx.Abort()
+		return
 	}
 
 	var user models.Users
 	if err := helpers.GetCurrentByID(ctx, &user, claims["userID"].(string)); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Could not find the User")
+		ctx.Abort()
 		return
 	}
 
 	if user.ID == "" {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Could not find the User")
 		ctx.Abort()
+		return
 	}
 
 	ctx.Set("user", user)
