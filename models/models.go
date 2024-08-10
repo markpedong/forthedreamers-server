@@ -53,6 +53,7 @@ type Product struct {
 	Description  string                `json:"description" validate:"required"`
 	CollectionID string                `json:"collection_id"`
 	Variations   []ProductVariation    `json:"variations" gorm:"foreignKey:ProductID"`
+	Testimonials []Testimonials        `json:"testimonials" gorm:"foreignKey:ProductID"`
 	Images       pq.StringArray        `json:"images" gorm:"type:text[]"`
 	Features     pq.StringArray        `json:"features" gorm:"type:text[]"`
 	CreatedAt    int                   `json:"created_at" gorm:"autoCreateTime"`
@@ -81,6 +82,7 @@ type Testimonials struct {
 	Title     string                `json:"title" validate:"required"`
 	Author    string                `json:"author" validate:"required"`
 	Status    int                   `json:"status" gorm:"default:0"`
+	ProductID string                `json:"product_id"`
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`
