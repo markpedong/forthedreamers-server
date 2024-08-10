@@ -10,6 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
+func CreateNewProduct(payload *models.ProductPayload) models.Product {
+	return models.Product{
+		ID:           helpers.NewUUID(),
+		Name:         payload.Name,
+		Description:  payload.Description,
+		CollectionID: payload.CollectionID,
+		Features:     payload.Features,
+	}
+}
+
 func PublicProductDetails(ctx *gin.Context) {
 	var body struct {
 		ID string `json:"product_id" validate:"required"`
