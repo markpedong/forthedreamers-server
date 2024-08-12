@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/creasty/defaults v1.5.1 // indirect
+	github.com/gin-contrib/cors v1.7.2 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
