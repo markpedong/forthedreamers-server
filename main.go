@@ -26,8 +26,8 @@ func main() {
 			"https://forthedreamers.vercel.app",
 		},
 		AllowMethods:     []string{"POST", "GET"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
 		AllowCredentials: true,
 	}))
 

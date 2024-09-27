@@ -82,7 +82,7 @@ type Testimonials struct {
 	Title     string                `json:"title" validate:"required"`
 	Author    string                `json:"author" validate:"required"`
 	Status    int                   `json:"status" gorm:"default:0"`
-	ProductID string                `json:"product_id"`
+	ProductID string                `json:"product_id" validate:"required"`
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`

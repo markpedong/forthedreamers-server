@@ -16,7 +16,6 @@ func PublicCollections(ctx *gin.Context) {
 		Page     int `form:"page" json:"page"`
 	}
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if body.Page == 0 {

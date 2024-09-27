@@ -26,6 +26,7 @@ func CreateRoutes(r *gin.Engine) {
 		public.POST("/products/details", controllers.PublicProductDetails)
 		public.POST("/products/variations", controllers.PublicVariations)
 		public.POST("/website", controllers.PublicWebsite)
+		public.POST("/testimonials", controllers.PublicTestimonials)
 	}
 
 	api := r.Group("/api")
@@ -54,6 +55,12 @@ func CreateRoutes(r *gin.Engine) {
 		products.POST("/toggle", controllers.ToggleProducts)
 	}
 
+	testimonials := r.Group("/testimonials")
+	testimonials.Use(middleware.Authentication)
+	{
+		testimonials.POST("/add", controllers.AddTestimonials)
+		testimonials.POST("/get", controllers.GetTestimonials)
+	}
 	users := r.Group("/users")
 	users.Use(middleware.Authentication)
 	{
