@@ -35,6 +35,13 @@ func CreateRoutes(r *gin.Engine) {
 		api.POST("/uploadImage", controllers.UploadImage)
 	}
 
+	carts := r.Group("/carts")
+	carts.Use(middleware.Authentication)
+	{
+		carts.POST("/add", controllers.AddToCart)
+		carts.POST("/get", controllers.GetCart)
+	}
+
 	collections := r.Group("/collections")
 	collections.Use(middleware.Authentication)
 	{

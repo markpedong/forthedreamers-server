@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/forthedreamers-server/helpers"
-	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -23,7 +22,8 @@ func Authentication(ctx *gin.Context) {
 		return
 	}
 
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+	user := helpers.GetCurrUserToken(ctx)
+	token, err := jwt.Parse(user.Token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -45,13 +45,6 @@ func Authentication(ctx *gin.Context) {
 
 	if claims["ttl"].(float64) < float64(time.Now().Unix()) {
 		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT token expired")
-		ctx.Abort()
-		return
-	}
-
-	var user models.Users
-	if err := helpers.GetCurrentByID(ctx, &user, claims["userID"].(string)); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Could not find the User")
 		ctx.Abort()
 		return
 	}

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/forthedreamers-server/cloudinary"
@@ -31,8 +32,8 @@ func VerifyPassword(expectedHashedPassword, givenPassword string) (bool, string)
 
 func Login(ctx *gin.Context) {
 	var body struct {
-		UserName string `json:"username"`
-		Password string `json:"password"`
+		UserName string `json:"username" validate:"required"`
+		Password string `json:"password" validate:"required"`
 	}
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
 		return
@@ -50,28 +51,32 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	origin := ctx.GetHeader("Origin")
-	if origin == "https://forthedreamers.vercel.app" {
-		if existingUser.Status == 0 {
-			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot login this user, contact admin")
-			return
-		}
-	} else {
-		if existingUser.Role == "USER" {
-			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot access this website")
-			return
-		}
-	}
+	// origin := ctx.GetHeader("Origin")
+	// if origin == "https://forthedreamers.vercel.app" {
+	// 	if existingUser.Status == 0 {
+	// 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot login this user, contact admin")
+	// 		return
+	// 	}
+	// } else {
+	// 	if existingUser.Role == "USER" {
+	// 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot access this website")
+	// 		return
+	// 	}
+	// }
 
 	token, err := tokens.CreateAndSignJWT(&existingUser)
 	if err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+	existingUser.Token = token
+	database.DB.Save(&existingUser)
 
+	partToken := strings.Split(token, ".")
+	existingUser.Token = partToken[0]
 	userRes := map[string]interface{}{
-		"token":    token,
 		"userInfo": existingUser,
+		"token":    partToken[0],
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/forthedreamers-server/database"
+	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
@@ -162,4 +163,28 @@ func ToggleModelByID(ctx *gin.Context, model interface{}, id string) error {
 	}
 
 	return nil
+}
+
+func GetCurrUserToken(ctx *gin.Context, preload ...string) models.Users {
+	token := ctx.GetHeader("Token")
+
+	if token == "" {
+		ErrJSONResponse(ctx, http.StatusUnauthorized, "Token is missing")
+		ctx.Abort()
+		return models.Users{}
+	}
+
+	var user models.Users
+	query := database.DB
+	if len(preload) > 0 {
+		for _, p := range preload {
+			query = query.Preload(p)
+		}
+	}
+	if err := query.Where("token LIKE ?", token+"%").First(&user).Error; err != nil {
+		ctx.Abort()
+		return models.Users{}
+	}
+
+	return user
 }

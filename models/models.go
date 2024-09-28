@@ -21,6 +21,8 @@ type Users struct {
 	DeletedAt soft_delete.DeletedAt `json:"-"`
 	Status    int                   `json:"status" gorm:"default:0"`
 	Role      string                `json:"role" gorm:"default:USER"`
+	Token     string                `json:"token"`
+	CartItems []CartItem            `json:"cart_items" gorm:"foreignKey:UserID"`
 }
 
 type Collection struct {
@@ -54,6 +56,7 @@ type Product struct {
 	CollectionID string                `json:"collection_id"`
 	Variations   []ProductVariation    `json:"variations" gorm:"foreignKey:ProductID"`
 	Testimonials []Testimonials        `json:"testimonials" gorm:"foreignKey:ProductID"`
+	CartItems    []CartItem            `json:"cart_items" gorm:"foreignKey:ProductID"`
 	Images       pq.StringArray        `json:"images" gorm:"type:text[]"`
 	Features     pq.StringArray        `json:"features" gorm:"type:text[]"`
 	CreatedAt    int                   `json:"created_at" gorm:"autoCreateTime"`
@@ -86,4 +89,12 @@ type Testimonials struct {
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`
+}
+
+type CartItem struct {
+	ID          string `json:"id" gorm:"primaryKey"`
+	Quantity    int    `json:"quantity" validate:"required"`
+	ProductID   string `json:"product_id" validate:"required"`
+	VariationID string `json:"variation_id" validate:"required"`
+	UserID      string `json:"user_id" validate:"required"`
 }
