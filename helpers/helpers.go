@@ -181,7 +181,7 @@ func GetCurrUserToken(ctx *gin.Context, preload ...string) models.Users {
 			query = query.Preload(p)
 		}
 	}
-	if err := query.Where("token LIKE ?", token+"%").First(&user).Error; err != nil {
+	if err := query.Where("SUBSTR(token, 1, POSITION('.' IN token) - 1) = ?", token).First(&user).Error; err != nil {
 		ctx.Abort()
 		return models.Users{}
 	}

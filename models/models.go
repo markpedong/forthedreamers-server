@@ -22,7 +22,7 @@ type Users struct {
 	Status    int                   `json:"status" gorm:"default:0"`
 	Role      string                `json:"role" gorm:"default:USER"`
 	Token     string                `json:"token"`
-	CartItems []CartItem            `json:"cart_items" gorm:"foreignKey:UserID"`
+	CartItems []UserCart            `json:"cart_items" gorm:"foreignKey:UserID"`
 }
 
 type Collection struct {
@@ -96,5 +96,9 @@ type CartItem struct {
 	Quantity    int    `json:"quantity" validate:"required"`
 	ProductID   string `json:"product_id" validate:"required"`
 	VariationID string `json:"variation_id" validate:"required"`
-	UserID      string `json:"user_id" validate:"required"`
+}
+
+type UserCart struct {
+	UserID     string `gorm:"primaryKey"`
+	CartItemID string `gorm:"primaryKey"`
 }

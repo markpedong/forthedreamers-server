@@ -38,7 +38,7 @@ func CreateRoutes(r *gin.Engine) {
 	carts := r.Group("/carts")
 	carts.Use(middleware.Authentication)
 	{
-		carts.POST("/add", controllers.AddToCart)
+		carts.POST("/add", controllers.AddCartItem)
 		carts.POST("/get", controllers.GetCart)
 	}
 

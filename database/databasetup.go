@@ -32,6 +32,7 @@ func ConnectDB() {
 		&models.WebsiteData{},
 		&models.Testimonials{},
 		&models.CartItem{},
+		&models.UserCart{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())
