@@ -20,7 +20,6 @@ type Users struct {
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`
 	Status    int                   `json:"status" gorm:"default:0"`
-	Role      string                `json:"role" gorm:"default:USER"`
 	Token     string                `json:"token"`
 	CartItems []UserCart            `json:"cart_items" gorm:"foreignKey:UserID"`
 }

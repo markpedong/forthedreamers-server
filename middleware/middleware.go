@@ -17,7 +17,7 @@ import (
 func Authentication(ctx *gin.Context) {
 	tokenStr := ctx.Request.Header.Get("Token")
 	if tokenStr == "" {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Token is missing")
+		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "Token is missing")
 		ctx.Abort()
 		return
 	}
@@ -31,26 +31,26 @@ func Authentication(ctx *gin.Context) {
 		return []byte(os.Getenv("HMAC_SECRET")), nil
 	})
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, err.Error())
 		ctx.Abort()
 		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT Claims failed")
+		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "JWT Claims failed")
 		ctx.Abort()
 		return
 	}
 
 	if claims["ttl"].(float64) < float64(time.Now().Unix()) {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "JWT token expired")
+		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "JWT token expired")
 		ctx.Abort()
 		return
 	}
 
 	if user.ID == "" {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Could not find the User")
+		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "Could not find the User")
 		ctx.Abort()
 		return
 	}
