@@ -49,7 +49,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	userRes := helpers.UserGetTokenResponse(ctx, existingUser)
+	userRes := helpers.UserGetTokenResponse(ctx, &existingUser)
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }
 
@@ -84,7 +84,6 @@ func SignUp(ctx *gin.Context) {
 		Email     string `json:"email" validate:"required"`
 		Password  string `json:"password" validate:"required"`
 		Username  string `json:"username" validate:"required"`
-		Phone     string `json:"phone" validate:"required"`
 	}
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
 		return
@@ -97,12 +96,16 @@ func SignUp(ctx *gin.Context) {
 		Email:     body.Email,
 		Password:  body.Password,
 		Username:  body.Username,
-		Phone:     body.Phone,
+	}
+	existingUser := models.Users{}
+	if err := database.DB.Where("email = ? OR username = ?", body.Email, body.Username).First(&existingUser).Error; err == nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "email or username already exists")
+		return
 	}
 	if err := helpers.CreateNewData(ctx, &newUser); err != nil {
 		return
 	}
 
-	userRes := helpers.UserGetTokenResponse(ctx, newUser)
+	userRes := helpers.UserGetTokenResponse(ctx, &newUser)
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }

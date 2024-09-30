@@ -22,3 +22,11 @@ type CredentialResponse struct {
 	UserInfo UsersResponse `json:"userInfo"`
 	Token    string        `json:"token"`
 }
+
+type AddressItemReponse struct {
+	ID        string `json:"id" gorm:"primaryKey"`
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+	Phone     string `json:"phone" validate:"required"`
+	Address   string `json:"address" validate:"required"`
+}

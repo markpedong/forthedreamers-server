@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserGetTokenResponse(ctx *gin.Context, user models.Users) models.CredentialResponse {
+func UserGetTokenResponse(ctx *gin.Context, user *models.Users) models.CredentialResponse {
 	token, err := tokens.CreateAndSignJWT(&user.ID)
 	if err != nil {
 		ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
