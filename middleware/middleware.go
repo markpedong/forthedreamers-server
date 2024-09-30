@@ -15,7 +15,7 @@ import (
 )
 
 func Authentication(ctx *gin.Context) {
-	tokenStr := ctx.Request.Header.Get("Token")
+	tokenStr := ctx.Request.Header.Get("token")
 	if tokenStr == "" {
 		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "Token is missing")
 		ctx.Abort()
@@ -23,6 +23,7 @@ func Authentication(ctx *gin.Context) {
 	}
 
 	user := helpers.GetCurrUserToken(ctx)
+	fmt.Println("USER", user)
 	token, err := jwt.Parse(user.Token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

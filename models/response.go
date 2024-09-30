@@ -7,3 +7,15 @@ type VariationResponse struct {
 	Price    int    `json:"price" validate:"required"`
 	Quantity int    `json:"quantity" validate:"required"`
 }
+
+type UsersResponse struct {
+	ID        string `json:"id" gorm:"primaryKey"`
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+	Phone     string `json:"phone" validate:"required"`
+	Address   string `json:"address" validate:"required"`
+	Email     string `json:"email" validate:"required"`
+	Image     string `json:"image" validate:"required"`
+	Username  string `json:"username"`
+	Token     string `json:"token"`
+}

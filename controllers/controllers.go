@@ -60,10 +60,22 @@ func Login(ctx *gin.Context) {
 	database.DB.Save(&existingUser)
 
 	partToken := strings.Split(token, ".")
-	existingUser.Token = partToken[0]
+	existingUser.Token = partToken[1]
+	newUserResponse := models.UsersResponse{
+		ID:        existingUser.ID,
+		Token:     existingUser.Token,
+		FirstName: existingUser.FirstName,
+		LastName:  existingUser.LastName,
+		Email:     existingUser.Email,
+		Image:     existingUser.Image,
+		Username:  existingUser.Username,
+		Phone:     existingUser.Phone,
+		Address:   existingUser.Address,
+	}
+
 	userRes := map[string]interface{}{
-		"userInfo": existingUser,
-		"token":    partToken[0],
+		"userInfo": newUserResponse,
+		"token":    partToken[1],
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
