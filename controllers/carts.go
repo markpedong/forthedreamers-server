@@ -17,7 +17,7 @@ func GetCart(ctx *gin.Context) {
 		Select("cart_item.*").
 		Joins("JOIN cart_item ON user_cart.cart_item_id = cart_item.id").
 		Where("user_cart.user_id = ?", userID).
-		Scan(&cartItems).Error; err != nil {
+		Find(&cartItems).Error; err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}

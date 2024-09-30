@@ -4,14 +4,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/forthedreamers-server/models"
 	"github.com/golang-jwt/jwt"
 )
 
-func CreateAndSignJWT(user *models.Users) (string, error) {
+func CreateAndSignJWT(userID *string) (string, error) {
+	expirationTime := time.Now().Add(time.Hour * 12).Unix()
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": user.ID,
-		"ttl":    time.Now().Add(time.Hour * 24 * 100).Unix(),
+		"userID": userID,
+		"exp":    expirationTime,
 	})
 
 	return token.SignedString([]byte(os.Getenv("HMAC_SECRET")))
