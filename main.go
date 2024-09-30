@@ -20,6 +20,7 @@ func main() {
 	r := gin.New()
 
 	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"https://forthedreamers-admin.vercel.app",
