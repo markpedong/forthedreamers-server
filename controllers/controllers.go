@@ -2,14 +2,12 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/forthedreamers-server/cloudinary"
 	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
-	"github.com/forthedreamers-server/tokens"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,33 +49,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := tokens.CreateAndSignJWT(&existingUser.ID)
-	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-	existingUser.Token = token
-	database.DB.Save(&existingUser)
-
-	partToken := strings.Split(token, ".")
-	existingUser.Token = partToken[1]
-	newUserResponse := models.UsersResponse{
-		ID:        existingUser.ID,
-		Token:     existingUser.Token,
-		FirstName: existingUser.FirstName,
-		LastName:  existingUser.LastName,
-		Email:     existingUser.Email,
-		Image:     existingUser.Image,
-		Username:  existingUser.Username,
-		Phone:     existingUser.Phone,
-		Address:   existingUser.Address,
-	}
-
-	userRes := map[string]interface{}{
-		"userInfo": newUserResponse,
-		"token":    partToken[1],
-	}
-
+	userRes := helpers.UserGetTokenResponse(ctx, existingUser)
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }
 
@@ -103,4 +75,34 @@ func UploadImage(ctx *gin.Context) {
 	}
 
 	helpers.JSONResponse(ctx, "upload successful!", helpers.DataHelper(imageRes))
+}
+
+func SignUp(ctx *gin.Context) {
+	var body struct {
+		FirstName string `json:"first_name" validate:"required"`
+		LastName  string `json:"last_name" validate:"required"`
+		Email     string `json:"email" validate:"required"`
+		Password  string `json:"password" validate:"required"`
+		Username  string `json:"username" validate:"required"`
+		Phone     string `json:"phone" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+		return
+	}
+
+	newUser := models.Users{
+		ID:        helpers.NewUUID(),
+		FirstName: body.FirstName,
+		LastName:  body.LastName,
+		Email:     body.Email,
+		Password:  body.Password,
+		Username:  body.Username,
+		Phone:     body.Phone,
+	}
+	if err := helpers.CreateNewData(ctx, &newUser); err != nil {
+		return
+	}
+
+	userRes := helpers.UserGetTokenResponse(ctx, newUser)
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
 }

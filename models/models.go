@@ -6,12 +6,19 @@ import (
 	"gorm.io/plugin/soft_delete"
 )
 
+type AddressItem struct {
+	ID        string `json:"id" gorm:"primaryKey"`
+	Details   string `json:"details" validate:"required"`
+	IsDefault int    `json:"is_default" gorm:"default:0"`
+	UserID    string `json:"user_id" validate:"required"`
+}
+
 type Users struct {
 	ID        string                `json:"id" gorm:"primaryKey"`
 	FirstName string                `json:"first_name" validate:"required"`
 	LastName  string                `json:"last_name" validate:"required"`
 	Phone     string                `json:"phone" validate:"required"`
-	Address   string                `json:"address" validate:"required"`
+	Address   []AddressItem         `json:"address" gorm:"foreignKey:UserID"`
 	Email     string                `json:"email" validate:"required"`
 	Image     string                `json:"image" validate:"required"`
 	Username  string                `json:"username"`
@@ -95,9 +102,18 @@ type CartItem struct {
 	Quantity    int    `json:"quantity" validate:"required"`
 	ProductID   string `json:"product_id" validate:"required"`
 	VariationID string `json:"variation_id" validate:"required"`
+	OrderItemID string `json:"-" validate:"required"`
 }
 
 type UserCart struct {
 	UserID     string `gorm:"primaryKey"`
 	CartItemID string `gorm:"primaryKey"`
+}
+
+type OrderItem struct {
+	ID      string     `json:"id" gorm:"primaryKey"`
+	Address string     `json:"address" validate:"required"`
+	Items   []CartItem `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
+	Price   int        `json:"price" validate:"required"`
+	Status  int        `json:"status" gorm:"default:0"`
 }

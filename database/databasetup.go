@@ -33,6 +33,7 @@ func ConnectDB() {
 		&models.Testimonials{},
 		&models.CartItem{},
 		&models.UserCart{},
+		&models.AddressItem{},
 	)
 	if err != nil {
 		log.Fatal(err.Error())

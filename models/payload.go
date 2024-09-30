@@ -11,15 +11,15 @@ type CollectionPayload struct {
 }
 
 type UserPayload struct {
-	ID        string `json:"id"`
-	Image     string `json:"image" validate:"required"`
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
-	Phone     string `json:"phone" validate:"required"`
-	Address   string `json:"address" validate:"required"`
-	Email     string `json:"email" validate:"required"`
-	Username  string `json:"username" validate:"required"`
-	Password  string `json:"password" validate:"required"`
+	ID        string        `json:"id"`
+	Image     string        `json:"image" validate:"required"`
+	FirstName string        `json:"first_name" validate:"required"`
+	LastName  string        `json:"last_name" validate:"required"`
+	Phone     string        `json:"phone" validate:"required"`
+	Address   []AddressItem `json:"address"`
+	Email     string        `json:"email" validate:"required"`
+	Username  string        `json:"username" validate:"required"`
+	Password  string        `json:"password" validate:"required"`
 }
 
 type ProductVariationPayload struct {

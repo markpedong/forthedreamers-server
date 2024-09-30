@@ -13,9 +13,12 @@ type UsersResponse struct {
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
 	Phone     string `json:"phone" validate:"required"`
-	Address   string `json:"address" validate:"required"`
 	Email     string `json:"email" validate:"required"`
 	Image     string `json:"image" validate:"required"`
 	Username  string `json:"username"`
-	Token     string `json:"token"`
+}
+
+type CredentialResponse struct {
+	UserInfo UsersResponse `json:"userInfo"`
+	Token    string        `json:"token"`
 }
