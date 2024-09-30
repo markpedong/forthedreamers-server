@@ -51,16 +51,16 @@ func AddCartItem(ctx *gin.Context) {
 	helpers.JSONResponse(ctx, "cart item added successfully")
 }
 
-func RemoveItemFromCart(ctx *gin.Context) {
+func DeleteCartItem(ctx *gin.Context) {
 	var body struct {
-		ProductID string `json:"product_id" validate:"required"`
+		CartID string `json:"cart_id" validate:"required"`
 	}
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
 		return
 	}
 
 	var currCartItem models.CartItem
-	if err := helpers.GetCurrentByID(ctx, &currCartItem, body.ProductID); err != nil {
+	if err := helpers.GetCurrentByID(ctx, &currCartItem, body.CartID); err != nil {
 		return
 	}
 

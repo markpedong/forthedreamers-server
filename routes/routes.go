@@ -40,6 +40,7 @@ func CreateRoutes(r *gin.Engine) {
 	{
 		carts.POST("/add", controllers.AddCartItem)
 		carts.POST("/get", controllers.GetCart)
+		carts.POST("/delete", controllers.DeleteCartItem)
 	}
 
 	collections := r.Group("/collections")
