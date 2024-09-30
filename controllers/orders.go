@@ -14,9 +14,5 @@ func CheckoutOrder(ctx *gin.Context) {
 		return
 	}
 
-	// newOrder := models.OrderItem{
-	// 	ID: helpers.NewUUID(),
-	// }
-
 	helpers.JSONResponse(ctx, "")
 }
