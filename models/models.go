@@ -98,11 +98,12 @@ type Testimonials struct {
 }
 
 type CartItem struct {
-	ID          string `json:"id" gorm:"primaryKey"`
-	Quantity    int    `json:"quantity" validate:"required"`
-	ProductID   string `json:"product_id" validate:"required"`
-	VariationID string `json:"variation_id" validate:"required"`
-	OrderItemID string `json:"-" validate:"required"`
+	ID          string                `json:"id" gorm:"primaryKey"`
+	Quantity    int                   `json:"quantity" validate:"required"`
+	ProductID   string                `json:"product_id" validate:"required"`
+	VariationID string                `json:"variation_id" validate:"required"`
+	OrderItemID string                `json:"-" validate:"required"`
+	DeletedAt   soft_delete.DeletedAt `json:"-"`
 }
 
 type UserCart struct {
