@@ -36,10 +36,15 @@ func AddCartItem(ctx *gin.Context) {
 		return
 	}
 
+	var currVariation models.ProductVariation
+	if err := helpers.GetCurrentByID(ctx, &currVariation, body.VariationID); err != nil {
+		return
+	}
+
 	newCartItem := models.CartItem{
 		ID:          helpers.NewUUID(),
 		ProductID:   body.ProductID,
-		VariationID: body.VariationID,
+		VariationID: currVariation.ID,
 		Quantity:    body.Quantity,
 	}
 
