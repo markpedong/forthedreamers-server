@@ -61,7 +61,10 @@ func UploadImage(ctx *gin.Context) {
 		return
 	}
 
-	uploadResult, err := cloudinary.CloudinaryService.Upload.Upload(ctx, form, uploader.UploadParams{Folder: "forthedreamers"}) // Transformation: "c_fill,g_auto,h_500,w_500"
+	uploadResult, err := cloudinary.CloudinaryService.Upload.Upload(ctx, form, uploader.UploadParams{
+		Folder:         "forthedreamers",
+		Transformation: "f_webp,q_auto:good",
+	})
 
 	if err != nil {
 		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
