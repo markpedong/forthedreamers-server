@@ -50,7 +50,7 @@ func Login(ctx *gin.Context) {
 	}
 
 	userRes := helpers.UserGetTokenResponse(ctx, &existingUser)
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
+	helpers.JSONResponse(ctx, "Logged in successfully!", helpers.DataHelper(userRes))
 }
 
 func UploadImage(ctx *gin.Context) {

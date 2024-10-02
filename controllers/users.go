@@ -32,6 +32,22 @@ func AddUsers(ctx *gin.Context) {
 	helpers.JSONResponse(ctx, "")
 }
 
+func GetUserInfo(ctx *gin.Context) {
+	user := helpers.GetCurrUserToken(ctx)
+
+	newUserResponse := models.UsersResponse{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Image:     user.Image,
+		Username:  user.Username,
+		Phone:     user.Phone,
+	}
+
+	helpers.JSONResponse(ctx, "", helpers.DataHelper(newUserResponse))
+}
+
 func GetUsers(ctx *gin.Context) {
 	var users []models.Users
 
@@ -41,28 +57,31 @@ func GetUsers(ctx *gin.Context) {
 }
 
 func UpdateUsers(ctx *gin.Context) {
-	var body models.UserPayload
+	var body models.UpdateUserPayload
 	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
 		return
 	}
 
-	var currUser models.Users
-	if err := helpers.GetCurrentByID(ctx, &currUser, body.ID); err != nil {
+	currUser := helpers.GetCurrUserToken(ctx)
+	if currUser.Password != body.OldPassword {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "old password is not correct")
+		return
+	}
+	if body.NewPassword == body.OldPassword {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "old password and new password is same")
 		return
 	}
 
-	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
 	helpers.UpdateByModel(ctx, &currUser, models.Users{
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 		Image:     body.Image,
 		Phone:     body.Phone,
-		Address:   body.Address,
 		Email:     body.Email,
 		Username:  body.Username,
-		Password:  body.Password,
+		Password:  body.NewPassword,
 	})
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(ctx, "Successfully updated!")
 }
 
 func DeleteUsers(ctx *gin.Context) {

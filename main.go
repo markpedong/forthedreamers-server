@@ -28,7 +28,7 @@ func main() {
 			// "http://localhost:6600",
 		},
 		AllowMethods:     []string{"POST", "GET"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Token"},
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
 		AllowCredentials: true,
 	}))

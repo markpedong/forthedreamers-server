@@ -83,6 +83,7 @@ func CreateRoutes(r *gin.Engine) {
 	users.Use(middleware.Authentication)
 	{
 		users.POST("/add", controllers.AddUsers)
+		users.POST("/info", controllers.GetUserInfo)
 		users.POST("/get", controllers.GetUsers)
 		users.POST("/update", controllers.UpdateUsers)
 		users.POST("/delete", controllers.DeleteUsers)
