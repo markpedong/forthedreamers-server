@@ -16,6 +16,7 @@ import (
 
 func init() {
 	database.ConnectDB()
+	goth.UseProviders(google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), "http://localhost:6601/public/googleCallback", "email", "profile"))
 }
 
 func main() {
@@ -38,9 +39,6 @@ func main() {
 
 	r.MaxMultipartMemory = 20 << 20
 
-	goth.UseProviders(
-		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/callback"),
-	)
 	routes.CreateRoutes(r)
 	log.Fatal(r.Run(":6601"))
 }
