@@ -23,7 +23,7 @@ func CreateRoutes(r *gin.Engine) {
 		public.POST("/signup", controllers.SignUp)
 		public.POST("/collections", controllers.PublicCollections)
 		public.POST("/collectionsByID", controllers.GetCollectionByID)
-		public.POST("/products", controllers.PublicProducts)
+		public.GET("/products", controllers.PublicProducts)
 		public.POST("/products/details", controllers.PublicProductDetails)
 		public.POST("/products/variations", controllers.PublicVariations)
 		public.POST("/website", controllers.PublicWebsite)

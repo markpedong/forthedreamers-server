@@ -46,58 +46,52 @@ func PublicProductDetails(ctx *gin.Context) {
 
 func PublicProducts(ctx *gin.Context) {
 	var body struct {
-		Search   string `json:"search"`
-		PageSize int    `json:"page_size"`
-		Page     int    `json:"page"`
+		Search   string `form:"search"`
+		PageSize int    `form:"page_size"`
+		Page     int    `form:"page"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateQuery(ctx, &body); err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	query := database.DB.Preload("Variations", func(db *gorm.DB) *gorm.DB {
-		return db.
-			Where("status = ?", 1).
-			Order("created_at DESC")
-	})
-	if body.Page == 0 {
-		body.Page = 1
+		return db.Where("status = ?", 1).Order("created_at DESC")
+	}).Where("status = ?", 1)
+
+	if body.PageSize > 0 && body.Page > 0 {
+		query.Offset((body.Page - 1) * body.PageSize).Limit(body.PageSize)
 	}
 
-	if body.PageSize == 0 {
-		body.PageSize = 10
+	if body.Search != "" {
+		query = query.Where("name ILIKE ?", "%"+body.Search+"%")
 	}
 
 	var products []models.Product
-	if err := query.
-		Limit(body.PageSize).
-		Offset((body.Page-1)*body.PageSize).
-		Where("name ILIKE ? AND status = ?", "%"+body.Search+"%", 1).
-		Find(&products).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := query.Find(&products).Error; err != nil {
+		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "Failed to fetch products")
 		return
 	}
 
-	var filteredProducts []map[string]interface{}
-	for _, product := range products {
-		var filteredVariations []map[string]interface{}
-		for _, w := range product.Variations {
-			variation := map[string]interface{}{
+	filteredProducts := make([]map[string]interface{}, len(products))
+	for i, product := range products {
+		filteredVariations := make([]map[string]interface{}, len(product.Variations))
+		for j, w := range product.Variations {
+			filteredVariations[j] = map[string]interface{}{
 				"id":    w.ID,
 				"size":  w.Size,
 				"color": w.Color,
 				"price": w.Price,
 			}
-			filteredVariations = append(filteredVariations, variation)
 		}
 
-		filteredProduct := map[string]interface{}{
+		filteredProducts[i] = map[string]interface{}{
 			"id":          product.ID,
 			"name":        product.Name,
 			"description": product.Description,
 			"images":      product.Images,
 			"variations":  filteredVariations,
 		}
-		filteredProducts = append(filteredProducts, filteredProduct)
 	}
 
 	helpers.JSONResponse(ctx, "", helpers.DataHelper(filteredProducts))

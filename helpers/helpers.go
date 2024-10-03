@@ -70,6 +70,20 @@ func BindValidateJSON(ctx *gin.Context, body interface{}) error {
 	return nil
 }
 
+func BindValidateQuery(ctx *gin.Context, body interface{}) error {
+	if err := ctx.BindQuery(body); err != nil {
+		ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return err
+	}
+
+	if err := Validate.Struct(body); err != nil {
+		ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		return err
+	}
+
+	return nil
+}
+
 // func GetTableByModelStatusON(ctx *gin.Context, model interface{}, preload ...string) interface{} {
 // 	query := database.DB.Where("status = ?", 1).Order("created_at DESC")
 
