@@ -24,13 +24,11 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	oauthToken := user.AccessToken
-
 	script := `
         <html>
         <head>
             <script>
-                window.opener.location.href = "http://localhost:6600/login?otp=` + oauthToken + `";
+                window.opener.location.href = "http://localhost:6600/login?otp=` + user.AccessToken + `";
                 window.close();
             </script>
         </head>
