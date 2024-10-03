@@ -9,12 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAddress(ctx *gin.Context) {
-	userID := helpers.GetCurrUserToken(ctx).ID
+func GetAddress(c *gin.Context) {
+	userID := helpers.GetCurrUserToken(c).ID
 
 	var address []models.AddressItem
 	if err := database.DB.Where("user_id = ?", userID).Find(&address).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	var transformedAddress []models.AddressItemReponse
@@ -28,16 +28,16 @@ func GetAddress(ctx *gin.Context) {
 		})
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedAddress))
+	helpers.JSONResponse(c, "", helpers.DataHelper(transformedAddress))
 }
 
-func AddAddress(ctx *gin.Context) {
+func AddAddress(c *gin.Context) {
 	var body models.AddressItem
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
-	userID := helpers.GetCurrUserToken(ctx).ID
+	userID := helpers.GetCurrUserToken(c).ID
 	address := models.AddressItem{
 		ID:        helpers.NewUUID(),
 		UserID:    userID,
@@ -46,26 +46,26 @@ func AddAddress(ctx *gin.Context) {
 		LastName:  body.LastName,
 		Address:   body.Address,
 	}
-	if err := helpers.CreateNewData(ctx, &address); err != nil {
+	if err := helpers.CreateNewData(c, &address); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func UpdateAddress(ctx *gin.Context) {
+func UpdateAddress(c *gin.Context) {
 	var body models.AddressItem
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currAddress models.AddressItem
-	if err := helpers.GetCurrentByID(ctx, &currAddress, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currAddress, body.ID); err != nil {
 		return
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE ADDRESS IS EXISTENT
-	helpers.UpdateByModel(ctx, &currAddress, models.AddressItem{
+	helpers.UpdateByModel(c, &currAddress, models.AddressItem{
 		Phone:     body.Phone,
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
@@ -73,23 +73,23 @@ func UpdateAddress(ctx *gin.Context) {
 		IsDefault: currAddress.IsDefault,
 	})
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&currAddress))
+	helpers.JSONResponse(c, "", helpers.DataHelper(&currAddress))
 }
 
-func DeleteAddress(ctx *gin.Context) {
+func DeleteAddress(c *gin.Context) {
 	var body struct {
 		ID string `json:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currAddress models.AddressItem
-	if err := helpers.GetCurrentByID(ctx, &currAddress, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currAddress, body.ID); err != nil {
 		return
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE ADDRESS IS EXISTENT
-	helpers.DeleteByModel(ctx, &currAddress)
-	helpers.JSONResponse(ctx, "")
+	helpers.DeleteByModel(c, &currAddress)
+	helpers.JSONResponse(c, "")
 }

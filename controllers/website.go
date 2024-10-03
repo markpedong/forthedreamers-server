@@ -9,47 +9,47 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetWebsiteData(ctx *gin.Context) {
+func GetWebsiteData(c *gin.Context) {
 	var website models.WebsiteData
 
 	if err := database.DB.First(&website).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(website))
+	helpers.JSONResponse(c, "", helpers.DataHelper(website))
 }
 
-func UpdateWebsiteData(ctx *gin.Context) {
+func UpdateWebsiteData(c *gin.Context) {
 	var website models.WebsiteData
-	if err := helpers.BindValidateJSON(ctx, &website); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &website); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := database.DB.Updates(&website).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func PublicWebsite(ctx *gin.Context) {
+func PublicWebsite(c *gin.Context) {
 	var website models.WebsiteData
 	var products []models.Product
 	var collections []models.Collection
 
 	if err := database.DB.First(&website).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if err := database.DB.Find(&products).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if err := database.DB.Find(&collections).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -66,5 +66,5 @@ func PublicWebsite(ctx *gin.Context) {
 		"collection_length": len(collections),
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedResponse))
+	helpers.JSONResponse(c, "", helpers.DataHelper(transformedResponse))
 }

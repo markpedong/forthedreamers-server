@@ -9,8 +9,8 @@ import (
 )
 
 func CreateRoutes(r *gin.Engine) {
-	r.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
 			"message": "API IS WORKING",
 			"success": true,
 			"status":  http.StatusOK,

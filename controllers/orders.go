@@ -11,12 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func CheckoutOrder(ctx *gin.Context) {
+func CheckoutOrder(c *gin.Context) {
 	var body struct {
 		Ids       []string `json:"ids" validate:"required"`
 		AddressID string   `json:"address_id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
@@ -24,7 +24,7 @@ func CheckoutOrder(ctx *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
-			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "Internal server error")
+			helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Internal server error")
 		}
 	}()
 
@@ -34,53 +34,53 @@ func CheckoutOrder(ctx *gin.Context) {
 	}
 
 	for _, id := range body.Ids {
-		if err := processCartItem(ctx, tx, id, &newOrderItem); err != nil {
+		if err := processCartItem(c, tx, id, &newOrderItem); err != nil {
 			tx.Rollback()
 			return
 		}
 	}
 
 	if err := tx.Create(&newOrderItem).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "Failed to create new order")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to create new order")
 		return
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "Failed to commit transaction")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to commit transaction")
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func processCartItem(ctx *gin.Context, tx *gorm.DB, id string, newOrderItem *models.OrderItem) error {
+func processCartItem(c *gin.Context, tx *gorm.DB, id string, newOrderItem *models.OrderItem) error {
 	var cartItem models.CartItem
-	if err := helpers.GetCurrentByID(ctx, &cartItem, id); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusNotFound, "Cart item not found")
+	if err := helpers.GetCurrentByID(c, &cartItem, id); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusNotFound, "Cart item not found")
 		return err
 	}
 
 	cartItem.OrderItemID = newOrderItem.ID
 	cartItem.Status = 1
 	if err := tx.Save(&cartItem).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "Failed to update cart item")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to update cart item")
 		return err
 	}
 
 	var currVariation models.ProductVariation
-	if err := helpers.GetCurrentByID(ctx, &currVariation, cartItem.VariationID); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusNotFound, "Product variation not found")
+	if err := helpers.GetCurrentByID(c, &currVariation, cartItem.VariationID); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusNotFound, "Product variation not found")
 		return err
 	}
 
 	if currVariation.Quantity < cartItem.Quantity {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "Insufficient product quantity")
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "Insufficient product quantity")
 		return errors.New("insufficient quantity")
 	}
 
 	currVariation.Quantity -= cartItem.Quantity
 	if err := tx.Save(&currVariation).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "Failed to update product variation")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to update product variation")
 		return err
 	}
 

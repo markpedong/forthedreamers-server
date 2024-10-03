@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PublicVariations(ctx *gin.Context) {
+func PublicVariations(c *gin.Context) {
 	var body struct {
 		ID string `json:"product_id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currVariations []models.ProductVariation
 	if err := database.DB.Where("status = ?", 1).Order("created_at DESC").Find(&currVariations, "product_id = ?", body.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -36,83 +36,83 @@ func PublicVariations(ctx *gin.Context) {
 		productVariations = append(productVariations, newProductVariation)
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(productVariations))
+	helpers.JSONResponse(c, "", helpers.DataHelper(productVariations))
 }
 
-func GetVariations(ctx *gin.Context) {
+func GetVariations(c *gin.Context) {
 	var body struct {
 		ProductID string `json:"product_id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var variations []models.ProductVariation
 	if err := database.DB.Find(&variations, "product_id = ?", body.ProductID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(variations))
+	helpers.JSONResponse(c, "", helpers.DataHelper(variations))
 }
 
-func UpdateVariations(ctx *gin.Context) {
+func UpdateVariations(c *gin.Context) {
 	var body models.ProductVariationPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var currVariation models.ProductVariation
-	if err := helpers.GetCurrentByID(ctx, &currVariation, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currVariation, body.ID); err != nil {
 		return
 	}
 
-	helpers.UpdateByModel(ctx, &currVariation, models.ProductVariation{Size: body.Size, Color: body.Color, Price: body.Price, Quantity: body.Quantity})
-	helpers.JSONResponse(ctx, "")
+	helpers.UpdateByModel(c, &currVariation, models.ProductVariation{Size: body.Size, Color: body.Color, Price: body.Price, Quantity: body.Quantity})
+	helpers.JSONResponse(c, "")
 }
 
-func ToggleVariations(ctx *gin.Context) {
+func ToggleVariations(c *gin.Context) {
 	var body struct {
 		ID string `json:"ID" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := helpers.ToggleModelByID(ctx, &models.ProductVariation{}, body.ID); err != nil {
+	if err := helpers.ToggleModelByID(c, &models.ProductVariation{}, body.ID); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func DeleteVariations(ctx *gin.Context) {
+func DeleteVariations(c *gin.Context) {
 	var body struct {
 		ID string `json:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currVariation models.ProductVariation
-	if err := helpers.GetCurrentByID(ctx, &currVariation, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currVariation, body.ID); err != nil {
 		return
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE VARIATION IS EXISTENT
-	helpers.DeleteByModel(ctx, &currVariation)
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&currVariation))
+	helpers.DeleteByModel(c, &currVariation)
+	helpers.JSONResponse(c, "", helpers.DataHelper(&currVariation))
 }
 
-func AddVariations(ctx *gin.Context) {
+func AddVariations(c *gin.Context) {
 	var body models.ProductVariationPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currProduct models.Product
-	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ProductID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currProduct, body.ProductID); err != nil {
 		return
 	}
 
@@ -124,9 +124,9 @@ func AddVariations(ctx *gin.Context) {
 		Quantity:  body.Quantity,
 		ProductID: currProduct.ID,
 	}
-	if err := helpers.CreateNewData(ctx, &newVariation); err != nil {
+	if err := helpers.CreateNewData(c, &newVariation); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }

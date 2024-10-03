@@ -28,7 +28,7 @@ func main() {
 		AllowOrigins: []string{
 			"https://forthedreamers-admin.vercel.app",
 			"https://forthedreamers.vercel.app",
-			"http://localhost:6600",
+			// "http://localhost:6600",
 		},
 		AllowMethods:     []string{"POST", "GET"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Token"},
@@ -39,7 +39,7 @@ func main() {
 	r.MaxMultipartMemory = 20 << 20
 
 	goth.UseProviders(
-		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/login?otp="),
+		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), "http://localhost:3000/callback"),
 	)
 	routes.CreateRoutes(r)
 	log.Fatal(r.Run(":6601"))

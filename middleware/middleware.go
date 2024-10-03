@@ -14,15 +14,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Authentication(ctx *gin.Context) {
-	tokenStr := ctx.Request.Header.Get("token")
+func Authentication(c *gin.Context) {
+	tokenStr := c.Request.Header.Get("token")
 	if tokenStr == "" {
-		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "Token is missing")
-		ctx.Abort()
+		helpers.ErrJSONResponse(c, http.StatusUnauthorized, "Token is missing")
+		c.Abort()
 		return
 	}
 
-	user := helpers.GetCurrUserToken(ctx)
+	user := helpers.GetCurrUserToken(c)
 	fmt.Println("USER", user)
 	token, err := jwt.Parse(user.Token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -32,30 +32,30 @@ func Authentication(ctx *gin.Context) {
 		return []byte(os.Getenv("HMAC_SECRET")), nil
 	})
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, err.Error())
-		ctx.Abort()
+		helpers.ErrJSONResponse(c, http.StatusUnauthorized, err.Error())
+		c.Abort()
 		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "JWT Claims failed")
-		ctx.Abort()
+		helpers.ErrJSONResponse(c, http.StatusUnauthorized, "JWT Claims failed")
+		c.Abort()
 		return
 	}
 
 	if claims["ttl"].(float64) < float64(time.Now().Unix()) {
-		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "JWT token expired")
-		ctx.Abort()
+		helpers.ErrJSONResponse(c, http.StatusUnauthorized, "JWT token expired")
+		c.Abort()
 		return
 	}
 
 	if user.ID == "" {
-		helpers.ErrJSONResponse(ctx, http.StatusUnauthorized, "Could not find the User")
-		ctx.Abort()
+		helpers.ErrJSONResponse(c, http.StatusUnauthorized, "Could not find the User")
+		c.Abort()
 		return
 	}
 
-	ctx.Set("user", user)
-	ctx.Next()
+	c.Set("user", user)
+	c.Next()
 }

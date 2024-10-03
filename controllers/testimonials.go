@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AddTestimonials(ctx *gin.Context) {
+func AddTestimonials(c *gin.Context) {
 	var body models.Testimonials
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
@@ -22,27 +22,27 @@ func AddTestimonials(ctx *gin.Context) {
 		Status:    body.Status,
 		ProductID: body.ProductID,
 	}
-	if err := helpers.CreateNewData(ctx, &newTestimonial); err != nil {
+	if err := helpers.CreateNewData(c, &newTestimonial); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func GetTestimonials(ctx *gin.Context) {
+func GetTestimonials(c *gin.Context) {
 	var testimonials []models.Testimonials
 	if err := database.DB.Find(&testimonials).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(testimonials))
+	helpers.JSONResponse(c, "", helpers.DataHelper(testimonials))
 }
 
-func PublicTestimonials(ctx *gin.Context) {
+func PublicTestimonials(c *gin.Context) {
 	var testimonials []models.Testimonials
 	if err := database.DB.Where("status = ?", 1).Find(&testimonials).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -57,5 +57,5 @@ func PublicTestimonials(ctx *gin.Context) {
 		transformedTestimonials = append(transformedTestimonials, newTestimonial)
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedTestimonials))
+	helpers.JSONResponse(c, "", helpers.DataHelper(transformedTestimonials))
 }

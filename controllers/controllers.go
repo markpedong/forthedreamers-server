@@ -28,46 +28,46 @@ func VerifyPassword(expectedHashedPassword, givenPassword string) (bool, string)
 	}
 }
 
-func Login(ctx *gin.Context) {
+func Login(c *gin.Context) {
 	var body struct {
 		UserName string `json:"username" validate:"required"`
 		Password string `json:"password" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var existingUser models.Users
 	if err := database.DB.First(&existingUser, "username = ?", body.UserName).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	notValid, msg := VerifyPassword(existingUser.Password, body.Password)
 	if notValid {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, msg)
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, msg)
 		return
 	}
 
-	userRes := helpers.UserGetTokenResponse(ctx, &existingUser)
-	helpers.JSONResponse(ctx, "Logged in successfully!", helpers.DataHelper(userRes))
+	userRes := helpers.UserGetTokenResponse(c, &existingUser)
+	helpers.JSONResponse(c, "Logged in successfully!", helpers.DataHelper(userRes))
 }
 
-func UploadImage(ctx *gin.Context) {
-	form, err := ctx.FormFile("file")
+func UploadImage(c *gin.Context) {
+	form, err := c.FormFile("file")
 
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	uploadResult, err := cloudinary.CloudinaryService.Upload.Upload(ctx, form, uploader.UploadParams{
+	uploadResult, err := cloudinary.CloudinaryService.Upload.Upload(c, form, uploader.UploadParams{
 		Folder:         "forthedreamers",
 		Transformation: "f_webp,q_auto:good,fl_lossy,c_fit",
 	})
 
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -77,10 +77,10 @@ func UploadImage(ctx *gin.Context) {
 		"size":     uploadResult.Bytes,
 	}
 
-	helpers.JSONResponse(ctx, "upload successful!", helpers.DataHelper(imageRes))
+	helpers.JSONResponse(c, "upload successful!", helpers.DataHelper(imageRes))
 }
 
-func SignUp(ctx *gin.Context) {
+func SignUp(c *gin.Context) {
 	var body struct {
 		FirstName string `json:"first_name" validate:"required"`
 		LastName  string `json:"last_name" validate:"required"`
@@ -88,7 +88,7 @@ func SignUp(ctx *gin.Context) {
 		Password  string `json:"password" validate:"required"`
 		Username  string `json:"username" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
@@ -102,13 +102,13 @@ func SignUp(ctx *gin.Context) {
 	}
 	existingUser := models.Users{}
 	if err := database.DB.Where("email = ? OR username = ?", body.Email, body.Username).First(&existingUser).Error; err == nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "email or username already exists")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "email or username already exists")
 		return
 	}
-	if err := helpers.CreateNewData(ctx, &newUser); err != nil {
+	if err := helpers.CreateNewData(c, &newUser); err != nil {
 		return
 	}
 
-	userRes := helpers.UserGetTokenResponse(ctx, &newUser)
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
+	userRes := helpers.UserGetTokenResponse(c, &newUser)
+	helpers.JSONResponse(c, "", helpers.DataHelper(userRes))
 }

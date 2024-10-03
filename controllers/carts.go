@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetCart(ctx *gin.Context) {
-	userID := helpers.GetCurrUserToken(ctx).ID
+func GetCart(c *gin.Context) {
+	userID := helpers.GetCurrUserToken(c).ID
 
 	var cartItems []models.CartItem
 	if err := database.DB.Table("user_cart").
@@ -18,26 +18,26 @@ func GetCart(ctx *gin.Context) {
 		Joins("JOIN cart_item ON user_cart.cart_item_id = cart_item.id").
 		Where("user_cart.user_id = ?", userID).
 		Find(&cartItems).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(cartItems))
+	helpers.JSONResponse(c, "", helpers.DataHelper(cartItems))
 }
 
-func AddCartItem(ctx *gin.Context) {
+func AddCartItem(c *gin.Context) {
 	var body struct {
 		ProductID   string `json:"product_id" validate:"required"`
 		Quantity    int    `json:"quantity" validate:"required"`
 		VariationID string `json:"variation_id" validate:"required"`
 	}
-	if err := ctx.ShouldBindJSON(&body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := c.ShouldBindJSON(&body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var currVariation models.ProductVariation
-	if err := helpers.GetCurrentByID(ctx, &currVariation, body.VariationID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currVariation, body.VariationID); err != nil {
 		return
 	}
 
@@ -48,32 +48,32 @@ func AddCartItem(ctx *gin.Context) {
 		Quantity:    body.Quantity,
 	}
 
-	userID := helpers.GetCurrUserToken(ctx).ID
-	if err := CreateNewCartItem(ctx, userID, &newCartItem); err != nil {
+	userID := helpers.GetCurrUserToken(c).ID
+	if err := CreateNewCartItem(c, userID, &newCartItem); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "cart item added successfully")
+	helpers.JSONResponse(c, "cart item added successfully")
 }
 
-func DeleteCartItem(ctx *gin.Context) {
+func DeleteCartItem(c *gin.Context) {
 	var body struct {
 		CartID string `json:"cart_id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currCartItem models.CartItem
-	if err := helpers.GetCurrentByID(ctx, &currCartItem, body.CartID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currCartItem, body.CartID); err != nil {
 		return
 	}
 
-	helpers.DeleteByModel(ctx, &currCartItem)
-	helpers.JSONResponse(ctx, "")
+	helpers.DeleteByModel(c, &currCartItem)
+	helpers.JSONResponse(c, "")
 }
 
-func CreateNewCartItem(ctx *gin.Context, userID string, newCartItem *models.CartItem) error {
+func CreateNewCartItem(c *gin.Context, userID string, newCartItem *models.CartItem) error {
 	tx := database.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -83,7 +83,7 @@ func CreateNewCartItem(ctx *gin.Context, userID string, newCartItem *models.Cart
 
 	if err := tx.Create(&newCartItem).Error; err != nil {
 		tx.Rollback()
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "failed to create cart item")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "failed to create cart item")
 		return err
 	}
 
@@ -93,7 +93,7 @@ func CreateNewCartItem(ctx *gin.Context, userID string, newCartItem *models.Cart
 	}
 	if err := tx.Create(&userCartEntry).Error; err != nil {
 		tx.Rollback()
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "failed to link cart item to user")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "failed to link cart item to user")
 		return err
 	}
 

@@ -10,12 +10,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func PublicCollections(ctx *gin.Context) {
+func PublicCollections(c *gin.Context) {
 	var body struct {
 		PageSize int `json:"page_size"`
 		Page     int `form:"page" json:"page"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 	if body.Page == 0 {
@@ -32,7 +32,7 @@ func PublicCollections(ctx *gin.Context) {
 		Limit(body.PageSize).
 		Offset((body.Page - 1) * body.PageSize).
 		Find(&collections).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -47,17 +47,17 @@ func PublicCollections(ctx *gin.Context) {
 		transformedCollections = append(transformedCollections, newCollection)
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(transformedCollections))
+	helpers.JSONResponse(c, "", helpers.DataHelper(transformedCollections))
 }
 
-func AddCollection(ctx *gin.Context) {
+func AddCollection(c *gin.Context) {
 	var body models.CollectionPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	if len(body.Images) < 1 {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, "images is required")
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "images is required")
 		return
 	}
 
@@ -66,83 +66,83 @@ func AddCollection(ctx *gin.Context) {
 		Name:   body.Name,
 		Images: body.Images,
 	}
-	if err := helpers.CreateNewData(ctx, &newCollection); err != nil {
+	if err := helpers.CreateNewData(c, &newCollection); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func GetCollection(ctx *gin.Context) {
+func GetCollection(c *gin.Context) {
 	var collections []models.Collection
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
-	helpers.GetTableByModel(ctx, &collections)
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&collections))
+	helpers.GetTableByModel(c, &collections)
+	helpers.JSONResponse(c, "", helpers.DataHelper(&collections))
 }
 
-func UpdateCollection(ctx *gin.Context) {
+func UpdateCollection(c *gin.Context) {
 	var body models.CollectionPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currCollection models.Collection
-	if err := helpers.GetCurrentByID(ctx, &currCollection, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currCollection, body.ID); err != nil {
 		return
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
-	helpers.UpdateByModel(ctx, &currCollection, models.Collection{Name: body.Name, Images: body.Images})
-	helpers.JSONResponse(ctx, "")
+	helpers.UpdateByModel(c, &currCollection, models.Collection{Name: body.Name, Images: body.Images})
+	helpers.JSONResponse(c, "")
 
 }
 
-func DeleteCollection(ctx *gin.Context) {
+func DeleteCollection(c *gin.Context) {
 	var body struct {
 		ID string `json:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currCollection models.Collection
-	if err := helpers.GetCurrentByID(ctx, &currCollection, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currCollection, body.ID); err != nil {
 		return
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE COLLECTION IS EXISTENT
-	helpers.DeleteByModel(ctx, &currCollection)
-	helpers.JSONResponse(ctx, "")
+	helpers.DeleteByModel(c, &currCollection)
+	helpers.JSONResponse(c, "")
 }
 
-func ToggleCollections(ctx *gin.Context) {
+func ToggleCollections(c *gin.Context) {
 	var body struct {
 		ID string `json:"ID" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := helpers.ToggleModelByID(ctx, &models.Collection{}, body.ID); err != nil {
+	if err := helpers.ToggleModelByID(c, &models.Collection{}, body.ID); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func GetCollectionByID(ctx *gin.Context) {
+func GetCollectionByID(c *gin.Context) {
 	var body struct {
 		ID string `json:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var collection models.Collection
 	if err := database.DB.Where("status = ?", 1).First(&collection, "id = ?", body.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -155,7 +155,7 @@ func GetCollectionByID(ctx *gin.Context) {
 		}).
 		Find(&collectionsProducts, "collection_id = ?", collection.ID).
 		Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -189,5 +189,5 @@ func GetCollectionByID(ctx *gin.Context) {
 		"products": filteredProducts,
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(newCollection))
+	helpers.JSONResponse(c, "", helpers.DataHelper(newCollection))
 }
