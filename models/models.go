@@ -2,6 +2,8 @@ package models
 
 import (
 	// "github.com/lib/pq"
+	"time"
+
 	"github.com/lib/pq"
 	"gorm.io/plugin/soft_delete"
 )
@@ -123,11 +125,19 @@ type OrderItem struct {
 }
 
 type GoogleUser struct {
-	Email         string `json:"email"`
-	FamilyName    string `json:"family_name"`
-	GivenName     string `json:"given_name"`
-	ID            string `json:"id"`
-	Name          string `json:"name"`
-	Picture       string `json:"picture"`
-	VerifiedEmail bool   `json:"verified_email"`
+	Provider          string    `json:"provider,omitempty"`
+	Email             string    `json:"email,omitempty"`
+	Name              string    `json:"name,omitempty"`
+	FirstName         string    `json:"first_name,omitempty"`
+	LastName          string    `json:"last_name,omitempty"`
+	NickName          string    `json:"nick_name,omitempty"`
+	Description       string    `json:"description,omitempty"`
+	UserID            string    `json:"user_id,omitempty"`
+	AvatarURL         string    `json:"avatar_url,omitempty"`
+	Location          string    `json:"location,omitempty"`
+	AccessToken       string    `json:"access_token,omitempty"`
+	AccessTokenSecret string    `json:"access_token_secret,omitempty"`
+	RefreshToken      string    `json:"refresh_token,omitempty"`
+	ExpiresAt         time.Time `json:"expires_at,omitempty"`
+	IDToken           string    `json:"id_token,omitempty"`
 }

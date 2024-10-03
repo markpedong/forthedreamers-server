@@ -1,13 +1,17 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
 	"github.com/forthedreamers-server/models"
+	"github.com/forthedreamers-server/tokens"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
+	"gorm.io/gorm"
 )
 
 func GoogleLogin(c *gin.Context) {
@@ -20,23 +24,49 @@ func GoogleLogin(c *gin.Context) {
 func GoogleCallback(c *gin.Context) {
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not complete authentication"})
+		c.String(http.StatusBadRequest, "Error: %s", err.Error())
 		return
 	}
 
-	script := `
-        <html>
-        <head>
-            <script>
-                window.opener.location.href = "http://localhost:6600/login?otp=` + user.AccessToken + `";
-                window.close();
-            </script>
-        </head>
-        <body></body>
-        </html>
-    `
-	c.Data(http.StatusOK, "text/html", []byte(script))
+	var existingUser models.Users
+	err = database.DB.First(&existingUser, "email = ?", user.Email).Error
 
+	if err == gorm.ErrRecordNotFound {
+		existingUser = models.Users{
+			Email:     user.Email,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Image:     user.AvatarURL,
+			Username:  strings.ReplaceAll(user.NickName, " ", ""),
+			ID:        user.UserID,
+		}
+	} else if err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	token, err := tokens.CreateAndSignJWT(&user.UserID)
+	if err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	existingUser.Token = token
+	if err := database.DB.Save(&existingUser).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	script := fmt.Sprintf(`
+		<script>
+			if (window.opener) {
+				window.opener.postMessage({ code:200, message: 'Logged in successfully', data: %s, token: '%s' }, '*');
+			}
+			window.close();
+		</script>
+	`, helpers.ToJSON(existingUser), existingUser.Token)
+
+	c.Data(http.StatusOK, "text/html", []byte(script))
 }
 
 func Login(c *gin.Context) {

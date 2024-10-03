@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/forthedreamers-server/database"
@@ -203,4 +205,13 @@ func GetCurrUserToken(c *gin.Context, preload ...string) models.Users {
 	}
 
 	return user
+}
+
+func ToJSON(v interface{}) string {
+	jsonData, err := json.Marshal(v)
+	if err != nil {
+		log.Println("Error marshalling to JSON:", err)
+		return "{}"
+	}
+	return string(jsonData)
 }

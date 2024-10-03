@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -16,7 +17,7 @@ import (
 
 func init() {
 	database.ConnectDB()
-	goth.UseProviders(google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), "http://localhost:6601/public/googleCallback", "email", "profile"))
+	goth.UseProviders(google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), fmt.Sprintf("%s/public/googleCallback", os.Getenv("WEB_CALLBACK")), "email", "profile"))
 }
 
 func main() {
