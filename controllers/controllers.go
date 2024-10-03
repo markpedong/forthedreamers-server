@@ -28,31 +28,6 @@ func VerifyPassword(expectedHashedPassword, givenPassword string) (bool, string)
 	}
 }
 
-func Login(c *gin.Context) {
-	var body struct {
-		UserName string `json:"username" validate:"required"`
-		Password string `json:"password" validate:"required"`
-	}
-	if err := helpers.BindValidateJSON(c, &body); err != nil {
-		return
-	}
-
-	var existingUser models.Users
-	if err := database.DB.First(&existingUser, "username = ?", body.UserName).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	notValid, msg := VerifyPassword(existingUser.Password, body.Password)
-	if notValid {
-		helpers.ErrJSONResponse(c, http.StatusBadRequest, msg)
-		return
-	}
-
-	userRes := helpers.UserGetTokenResponse(c, &existingUser)
-	helpers.JSONResponse(c, "Logged in successfully!", helpers.DataHelper(userRes))
-}
-
 func UploadImage(c *gin.Context) {
 	form, err := c.FormFile("file")
 

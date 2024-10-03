@@ -20,6 +20,8 @@ func CreateRoutes(r *gin.Engine) {
 	public := r.Group("/public")
 	{
 		public.POST("/login", controllers.Login)
+		public.GET("/googleLogin", controllers.GoogleLogin)
+		public.GET("/googleCallback", controllers.GoogleCallback)
 		public.POST("/signup", controllers.SignUp)
 		public.POST("/collections", controllers.PublicCollections)
 		public.POST("/collectionsByID", controllers.GetCollectionByID)
