@@ -121,3 +121,13 @@ type OrderItem struct {
 	Price     int        `json:"price" validate:"required"`
 	Status    int        `json:"status" gorm:"default:0"` // 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered
 }
+
+type GoogleUser struct {
+	Email         string `json:"email"`
+	FamilyName    string `json:"family_name"`
+	GivenName     string `json:"given_name"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Picture       string `json:"picture"`
+	VerifiedEmail bool   `json:"verified_email"`
+}

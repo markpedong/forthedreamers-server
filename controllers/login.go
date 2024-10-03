@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/forthedreamers-server/database"
@@ -19,22 +18,27 @@ func GoogleLogin(c *gin.Context) {
 }
 
 func GoogleCallback(c *gin.Context) {
-	q := c.Request.URL.Query()
-	q.Add("provider", "google")
-	c.Request.URL.RawQuery = q.Encode()
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	res, err := json.Marshal(user)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not complete authentication"})
 		return
 	}
 
-	jsonString := string(res)
-	c.JSON(http.StatusAccepted, jsonString)
+	oauthToken := user.AccessToken
+
+	script := `
+        <html>
+        <head>
+            <script>
+                window.opener.location.href = "http://localhost:6600/login?otp=` + oauthToken + `";
+                window.close();
+            </script>
+        </head>
+        <body></body>
+        </html>
+    `
+	c.Data(http.StatusOK, "text/html", []byte(script))
+
 }
 
 func Login(c *gin.Context) {
