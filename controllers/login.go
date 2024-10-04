@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/forthedreamers-server/database"
@@ -66,6 +67,7 @@ func GoogleCallback(c *gin.Context) {
 		</script>
 	`, helpers.ToJSON(existingUser), existingUser.Token)
 
+	c.SetCookie("token", existingUser.Token, 3600, "/", os.Getenv("WEB_DOMAIN"), true, true)
 	c.Data(http.StatusOK, "text/html", []byte(script))
 }
 
