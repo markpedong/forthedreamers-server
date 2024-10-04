@@ -42,7 +42,7 @@ func CreateRoutes(r *gin.Engine) {
 	addresses.Use(middleware.Authentication)
 	{
 		addresses.POST("/add", controllers.AddAddress)
-		addresses.POST("/get", controllers.GetAddress)
+		addresses.GET("/get", controllers.GetAddress)
 		addresses.POST("/update", controllers.UpdateAddress)
 		addresses.POST("/delete", controllers.DeleteAddress)
 	}

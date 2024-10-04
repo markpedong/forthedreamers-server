@@ -25,6 +25,7 @@ func GetAddress(c *gin.Context) {
 			LastName:  item.LastName,
 			Phone:     item.Phone,
 			Address:   item.Address,
+			IsDefault: item.IsDefault,
 		})
 	}
 
