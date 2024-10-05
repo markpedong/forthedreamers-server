@@ -38,14 +38,14 @@ func AddAddress(c *gin.Context) {
 		return
 	}
 
-	userID := helpers.GetCurrUserToken(c).ID
 	address := models.AddressItem{
 		ID:        helpers.NewUUID(),
-		UserID:    userID,
+		UserID:    helpers.GetCurrUserToken(c).ID,
 		Phone:     body.Phone,
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 		Address:   body.Address,
+		IsDefault: body.IsDefault,
 	}
 	if err := helpers.CreateNewData(c, &address); err != nil {
 		return
