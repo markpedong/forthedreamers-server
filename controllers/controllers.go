@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/forthedreamers-server/cloudinary"
@@ -86,6 +85,5 @@ func SignUp(c *gin.Context) {
 	}
 
 	userRes := helpers.UserGetTokenResponse(c, &newUser)
-	c.SetCookie("token", existingUser.Token, 3600, "/", os.Getenv("WEB_DOMAIN"), false, false)
 	helpers.JSONResponse(c, "", helpers.DataHelper(userRes))
 }
