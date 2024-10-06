@@ -33,20 +33,66 @@ func GetAddress(c *gin.Context) {
 }
 
 func AddAddress(c *gin.Context) {
+	userID := helpers.GetCurrUserToken(c).ID
+
 	var body models.AddressItem
 	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
+	var existingAddress []models.AddressItem
+	if qty := database.DB.Where("user_id = ?", userID).Find(&existingAddress).RowsAffected; qty >= 5 {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "You can only have a maximum of 5 addresses")
+		return
+	}
+
+	hasDefault := false
+	hasReturn := false
+	hasPickup := false
+
+	for _, item := range existingAddress {
+		switch item.IsDefault {
+		case 1:
+			hasDefault = true
+		case 2:
+			hasPickup = true
+		case 3:
+			hasReturn = true
+		}
+	}
+
+	switch body.IsDefault {
+	case 1:
+		if hasDefault {
+			helpers.ErrJSONResponse(c, http.StatusBadRequest, "Only one default address is allowed.")
+			return
+		}
+	case 2:
+		if hasPickup {
+			helpers.ErrJSONResponse(c, http.StatusBadRequest, "Only one pickup address is allowed.")
+			return
+		}
+	case 3:
+		if hasReturn {
+			helpers.ErrJSONResponse(c, http.StatusBadRequest, "Only one return address is allowed.")
+			return
+		}
+	case 0:
+	default:
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "Invalid address type.")
+		return
+	}
+
 	address := models.AddressItem{
 		ID:        helpers.NewUUID(),
-		UserID:    helpers.GetCurrUserToken(c).ID,
+		UserID:    userID,
 		Phone:     body.Phone,
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 		Address:   body.Address,
 		IsDefault: body.IsDefault,
 	}
+
 	if err := helpers.CreateNewData(c, &address); err != nil {
 		return
 	}
