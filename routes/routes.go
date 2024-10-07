@@ -51,7 +51,7 @@ func CreateRoutes(r *gin.Engine) {
 	carts.Use(middleware.Authentication)
 	{
 		carts.POST("/add", controllers.AddCartItem)
-		carts.POST("/get", controllers.GetCart)
+		carts.GET("/get", controllers.GetCart)
 		carts.POST("/delete", controllers.DeleteCartItem)
 	}
 
@@ -90,6 +90,7 @@ func CreateRoutes(r *gin.Engine) {
 		users.POST("/update", controllers.UpdateUsers)
 		users.POST("/delete", controllers.DeleteUsers)
 		users.POST("/toggle", controllers.ToggleUsers)
+		users.POST("/checkout", controllers.CheckoutOrder)
 	}
 
 	variations := r.Group("/variations")

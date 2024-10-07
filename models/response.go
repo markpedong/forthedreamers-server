@@ -31,3 +31,13 @@ type AddressItemReponse struct {
 	Address   string `json:"address" validate:"required"`
 	IsDefault int    `json:"is_default" gorm:"default:0"`
 }
+
+type CartItemResponse struct {
+	ID          string   `json:"id" gorm:"primaryKey"`
+	Quantity    int      `json:"quantity" validate:"required"`
+	ProductName string   `json:"name" validate:"required"`
+	Size        string   `json:"size,omitempty" validate:"required"`
+	Color       string   `json:"color,omitempty" validate:"required"`
+	Price       int      `json:"price" validate:"required"`
+	Image       []string `json:"images" validate:"required"`
+}

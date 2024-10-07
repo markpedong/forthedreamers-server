@@ -22,29 +22,58 @@ func GetCart(c *gin.Context) {
 		return
 	}
 
-	helpers.JSONResponse(c, "", helpers.DataHelper(cartItems))
+	var transformedCartItems []models.CartItemResponse
+	for _, v := range cartItems {
+		var transformedCartItem models.CartItemResponse
+		var product models.Product
+		var variation models.ProductVariation
+		helpers.GetCurrentByID(c, &product, v.ProductID)
+
+		if v.VariationID != "" {
+			helpers.GetCurrentByID(c, &variation, v.VariationID)
+			transformedCartItem.Size = variation.Size
+			transformedCartItem.Color = variation.Color
+			transformedCartItem.Price = variation.Price
+		}
+
+		transformedCartItem.ID = v.ID
+		transformedCartItem.ProductName = product.Name
+		transformedCartItem.Quantity = v.Quantity
+		transformedCartItem.Image = []string{product.Images[0]}
+
+		transformedCartItems = append(transformedCartItems, transformedCartItem)
+	}
+
+	helpers.JSONResponse(c, "", helpers.DataHelper(transformedCartItems))
 }
 
 func AddCartItem(c *gin.Context) {
 	var body struct {
 		ProductID   string `json:"product_id" validate:"required"`
 		Quantity    int    `json:"quantity" validate:"required"`
-		VariationID string `json:"variation_id" validate:"required"`
+		VariationID string `json:"variation_id"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
+
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currVariation models.ProductVariation
-	if err := helpers.GetCurrentByID(c, &currVariation, body.VariationID); err != nil {
-		return
+	var variationID string
+
+	if body.VariationID != "" {
+		if err := helpers.GetCurrentByID(c, &currVariation, body.VariationID); err != nil {
+			return
+		}
+		variationID = currVariation.ID
+	} else {
+		variationID = ""
 	}
 
 	newCartItem := models.CartItem{
 		ID:          helpers.NewUUID(),
 		ProductID:   body.ProductID,
-		VariationID: currVariation.ID,
+		VariationID: variationID,
 		Quantity:    body.Quantity,
 	}
 
