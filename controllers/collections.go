@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
@@ -12,39 +13,37 @@ import (
 
 func PublicCollections(c *gin.Context) {
 	var body struct {
-		PageSize int `json:"page_size"`
-		Page     int `form:"page" json:"page"`
+		PageSize string `form:"page_size,omitempty"`
+		Page     string `form:"page,omitempty"`
 	}
-	if err := helpers.BindValidateJSON(c, &body); err != nil {
+	if err := helpers.BindValidateQuery(c, &body); err != nil {
 		return
-	}
-	if body.Page == 0 {
-		body.Page = 1
-	}
-
-	if body.PageSize == 0 {
-		body.PageSize = 10
 	}
 
 	var collections []models.Collection
-	if err := database.DB.
-		Where("status = ?", 1).
-		Limit(body.PageSize).
-		Offset((body.Page - 1) * body.PageSize).
-		Find(&collections).Error; err != nil {
+	db := database.DB.Where("status = ?", 1)
+
+	if body.PageSize != "" && body.Page != "" {
+		pageSize, err1 := strconv.Atoi(body.PageSize)
+		page, err2 := strconv.Atoi(body.Page)
+
+		if err1 == nil && err2 == nil {
+			db = db.Limit(pageSize).Offset((page - 1) * pageSize)
+		}
+	}
+
+	if err := db.Find(&collections).Error; err != nil {
 		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	transformedCollections := []map[string]interface{}{}
-	for _, v := range collections {
-		newCollection := map[string]interface{}{
+	transformedCollections := make([]map[string]interface{}, len(collections))
+	for i, v := range collections {
+		transformedCollections[i] = map[string]interface{}{
 			"id":     v.ID,
 			"name":   v.Name,
-			"images": v.Images,
+			"images": []string{v.Images[0]},
 		}
-
-		transformedCollections = append(transformedCollections, newCollection)
 	}
 
 	helpers.JSONResponse(c, "", helpers.DataHelper(transformedCollections))

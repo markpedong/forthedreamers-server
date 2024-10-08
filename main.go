@@ -30,7 +30,7 @@ func main() {
 		AllowOrigins: []string{
 			"https://forthedreamers-admin.vercel.app",
 			"https://forthedreamers.vercel.app",
-			// "http://localhost:6600",
+			os.Getenv("WEB_DOMAIN"),
 		},
 		AllowMethods:     []string{"POST", "GET"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Token"},
