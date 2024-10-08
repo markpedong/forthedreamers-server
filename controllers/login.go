@@ -60,7 +60,7 @@ func GoogleCallback(c *gin.Context) {
 	script := fmt.Sprintf(`
 		<script>
 			if (window.opener) {
-				window.opener.postMessage({ code:200, message: 'Logged in successfully', data: %s, token: '%s' }, '*');
+				window.opener.postMessage({ data: { userInfo: %s, token: '%s', code: 200, message: 'Logged in successfully' }}, '*');
 			}
 			window.close();
 		</script>
