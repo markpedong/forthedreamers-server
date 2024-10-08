@@ -86,6 +86,29 @@ func AddCartItem(c *gin.Context) {
 	helpers.JSONResponse(c, "cart item added successfully")
 }
 
+func AddCartItemQuantity(c *gin.Context) {
+	var body struct {
+		CartID   string `json:"cart_id" validate:"required"`
+		Quantity int    `json:"quantity" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		return
+	}
+
+	var currCartItem models.CartItem
+	if err := helpers.GetCurrentByID(c, &currCartItem, body.CartID); err != nil {
+		return
+	}
+
+	currCartItem.Quantity = body.Quantity
+	if err := database.DB.Save(&currCartItem).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to update cart item")
+		return
+	}
+
+	helpers.JSONResponse(c, "")
+}
+
 func DeleteCartItem(c *gin.Context) {
 	var body struct {
 		CartID string `json:"cart_id" validate:"required"`

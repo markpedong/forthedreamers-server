@@ -51,6 +51,7 @@ func CreateRoutes(r *gin.Engine) {
 	carts.Use(middleware.Authentication)
 	{
 		carts.POST("/add", controllers.AddCartItem)
+		carts.POST("/addQuantity", controllers.AddCartItemQuantity)
 		carts.GET("/get", controllers.GetCart)
 		carts.POST("/delete", controllers.DeleteCartItem)
 	}
