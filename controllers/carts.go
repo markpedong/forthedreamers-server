@@ -40,6 +40,7 @@ func GetCart(c *gin.Context) {
 		transformedCartItem.ProductName = product.Name
 		transformedCartItem.Quantity = v.Quantity
 		transformedCartItem.Image = []string{product.Images[0]}
+		transformedCartItem.ProductID = v.ProductID
 
 		transformedCartItems = append(transformedCartItems, transformedCartItem)
 	}

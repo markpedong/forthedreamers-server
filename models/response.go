@@ -36,6 +36,7 @@ type CartItemResponse struct {
 	ID          string   `json:"id" gorm:"primaryKey"`
 	Quantity    int      `json:"quantity" validate:"required"`
 	ProductName string   `json:"name" validate:"required"`
+	ProductID   string   `json:"product_id" validate:"required"`
 	Size        string   `json:"size,omitempty" validate:"required"`
 	Color       string   `json:"color,omitempty" validate:"required"`
 	Price       int      `json:"price" validate:"required"`
