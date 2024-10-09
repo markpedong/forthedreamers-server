@@ -11,9 +11,9 @@ import (
 
 func PublicVariations(c *gin.Context) {
 	var body struct {
-		ID string `json:"product_id" validate:"required"`
+		ID string `form:"product_id,omitempty"`
 	}
-	if err := helpers.BindValidateJSON(c, &body); err != nil {
+	if err := helpers.BindValidateQuery(c, &body); err != nil {
 		return
 	}
 

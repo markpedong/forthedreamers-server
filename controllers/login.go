@@ -64,7 +64,7 @@ func GoogleCallback(c *gin.Context) {
 			}
 			window.close();
 		</script>
-	`, helpers.ToJSON(existingUser), existingUser.Token)
+	`, helpers.ToJSON(existingUser), strings.Split(token, ".")[1])
 
 	c.Data(http.StatusOK, "text/html", []byte(script))
 }
