@@ -13,8 +13,9 @@ import (
 
 func CheckoutOrder(c *gin.Context) {
 	var body struct {
-		Ids       []string `json:"ids" validate:"required"`
-		AddressID string   `json:"address_id" validate:"required"`
+		Ids           []string `json:"ids" validate:"required"`
+		AddressID     string   `json:"address_id" validate:"required"`
+		PaymentMethod int      `json:"payment_method" validate:"required"`
 	}
 	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
@@ -29,8 +30,9 @@ func CheckoutOrder(c *gin.Context) {
 	}()
 
 	newOrderItem := models.OrderItem{
-		ID:        helpers.NewUUID(),
-		AddressID: body.AddressID,
+		ID:            helpers.NewUUID(),
+		AddressID:     body.AddressID,
+		PaymentMethod: body.PaymentMethod,
 	}
 
 	for _, id := range body.Ids {

@@ -117,11 +117,12 @@ type UserCart struct {
 }
 
 type OrderItem struct {
-	ID        string     `json:"id" gorm:"primaryKey"`
-	AddressID string     `json:"address_id" validate:"required"`
-	Items     []CartItem `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
-	Price     int        `json:"price" validate:"required"`
-	Status    int        `json:"status" gorm:"default:0"` // 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered
+	ID            string     `json:"id" gorm:"primaryKey"`
+	AddressID     string     `json:"address_id" validate:"required"`
+	Items         []CartItem `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
+	Price         int        `json:"price" validate:"required"`
+	Status        int        `json:"status" gorm:"default:0"` // 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered
+	PaymentMethod int        `json:"payment_method" validate:"required"`
 }
 
 type GoogleUser struct {
