@@ -12,11 +12,22 @@ import (
 func GetCart(c *gin.Context) {
 	userID := helpers.GetCurrUserToken(c).ID
 
+	var userCarts []models.UserCart
+	if err := database.DB.Where("user_id = ?", userID).Find(&userCarts).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var cartItemIDs []string
+	for _, uc := range userCarts {
+		cartItemIDs = append(cartItemIDs, uc.CartItemID)
+	}
+
 	var cartItems []models.CartItem
-	if err := database.DB.Table("user_cart").
-		Select("cart_item.*").
-		Joins("JOIN cart_item ON user_cart.cart_item_id = cart_item.id").
-		Where("user_cart.user_id = ?", userID).
+	if err := database.DB.
+		Where("id IN ?", cartItemIDs).
+		Where("status = ?", 0).
+		Order("created_at DESC").
 		Find(&cartItems).Error; err != nil {
 		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -31,7 +31,6 @@ func ConnectDB() {
 		&models.ProductVariation{},
 		&models.WebsiteData{},
 		&models.Testimonials{},
-		&models.CartItem{},
 		&models.UserCart{},
 		&models.AddressItem{},
 	); err != nil {
@@ -39,7 +38,10 @@ func ConnectDB() {
 		return
 	}
 
-	if err2 := DB.AutoMigrate(&models.OrderItem{}); err2 != nil {
+	if err2 := DB.AutoMigrate(
+		&models.CartItem{},
+		&models.OrderItem{},
+	); err2 != nil {
 		log.Fatal(err2.Error())
 		return
 	}

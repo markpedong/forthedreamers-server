@@ -33,6 +33,15 @@ func CheckoutOrder(c *gin.Context) {
 		ID:            helpers.NewUUID(),
 		AddressID:     body.AddressID,
 		PaymentMethod: body.PaymentMethod,
+		UserID:        helpers.GetCurrUserToken(c).ID,
+		Price:         0, // Initialize price as int
+	}
+
+	// First save the newOrderItem to get a valid ID
+	if err := tx.Create(&newOrderItem).Error; err != nil {
+		tx.Rollback()
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to create new order")
+		return
 	}
 
 	for _, id := range body.Ids {
@@ -42,8 +51,10 @@ func CheckoutOrder(c *gin.Context) {
 		}
 	}
 
-	if err := tx.Create(&newOrderItem).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to create new order")
+	// Save the updated newOrderItem with the final price
+	if err := tx.Save(&newOrderItem).Error; err != nil {
+		tx.Rollback()
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to update order price")
 		return
 	}
 
@@ -52,7 +63,7 @@ func CheckoutOrder(c *gin.Context) {
 		return
 	}
 
-	helpers.JSONResponse(c, "")
+	helpers.JSONResponse(c, "Order Placed Successfully")
 }
 
 func processCartItem(c *gin.Context, tx *gorm.DB, id string, newOrderItem *models.OrderItem) error {
@@ -62,10 +73,10 @@ func processCartItem(c *gin.Context, tx *gorm.DB, id string, newOrderItem *model
 		return err
 	}
 
-	cartItem.OrderItemID = newOrderItem.ID
+	cartItem.OrderItemID = &newOrderItem.ID
 	cartItem.Status = 1
 	if err := tx.Save(&cartItem).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to update cart item")
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return err
 	}
 
@@ -86,8 +97,22 @@ func processCartItem(c *gin.Context, tx *gorm.DB, id string, newOrderItem *model
 		return err
 	}
 
-	newOrderItem.Price += currVariation.Price * cartItem.Quantity
+	itemPrice := currVariation.Price * cartItem.Quantity
+	newOrderItem.Price += itemPrice
+
 	newOrderItem.Items = append(newOrderItem.Items, cartItem)
 
 	return nil
+}
+
+func GetOrders(c *gin.Context) {
+	userID := helpers.GetCurrUserToken(c).ID
+
+	var orderItems []models.OrderItem
+	if err := database.DB.Preload("Items").Find(&orderItems, "user_id = ?", userID).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(c, "", helpers.DataHelper(orderItems))
 }

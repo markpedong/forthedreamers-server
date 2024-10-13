@@ -34,6 +34,7 @@ type Users struct {
 	Status    int                   `json:"status" gorm:"default:1"`
 	Token     string                `json:"token"`
 	CartItems []UserCart            `json:"cart_items" gorm:"foreignKey:UserID"`
+	Orders    []OrderItem           `json:"orders" gorm:"foreignKey:UserID"`
 }
 
 type Collection struct {
@@ -103,12 +104,15 @@ type Testimonials struct {
 }
 
 type CartItem struct {
-	ID          string `json:"id" gorm:"primaryKey"`
-	Quantity    int    `json:"quantity" validate:"required"`
-	ProductID   string `json:"product_id" validate:"required"`
-	VariationID string `json:"variation_id" validate:"required"`
-	OrderItemID string `json:"-" validate:"required"`
-	Status      int    `json:"status" gorm:"default:0"` // 0 - cart, 1 - ordered, 2 - delivered, 3 - canceled/returned
+	ID          string                `json:"id" gorm:"primaryKey"`
+	Quantity    int                   `json:"quantity" validate:"required"`
+	ProductID   string                `json:"product_id" validate:"required"`
+	VariationID string                `json:"variation_id" validate:"required"`
+	OrderItemID *string               `json:"-"`
+	Status      int                   `json:"status" gorm:"default:0"` // 0 - cart, 1 - ordered, 2 - delivered, 3 - canceled/returned
+	CreatedAt   int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt   int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt   soft_delete.DeletedAt `json:"-"`
 }
 
 type UserCart struct {
@@ -117,12 +121,16 @@ type UserCart struct {
 }
 
 type OrderItem struct {
-	ID            string     `json:"id" gorm:"primaryKey"`
-	AddressID     string     `json:"address_id" validate:"required"`
-	Items         []CartItem `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
-	Price         int        `json:"price" validate:"required"`
-	Status        int        `json:"status" gorm:"default:0"` // 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered
-	PaymentMethod int        `json:"payment_method" validate:"required"`
+	ID            string                `json:"id" gorm:"primaryKey"`
+	AddressID     string                `json:"address_id" validate:"required"`
+	Items         []CartItem            `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
+	Price         int                   `json:"price" validate:"required"`
+	Status        int                   `json:"status" gorm:"default:0"` // 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered
+	PaymentMethod int                   `json:"payment_method" validate:"required"`
+	UserID        string                `json:"user_id"`
+	CreatedAt     int                   `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt     int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt     soft_delete.DeletedAt `json:"-"`
 }
 
 type GoogleUser struct {
