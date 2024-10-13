@@ -34,10 +34,9 @@ func CheckoutOrder(c *gin.Context) {
 		AddressID:     body.AddressID,
 		PaymentMethod: body.PaymentMethod,
 		UserID:        helpers.GetCurrUserToken(c).ID,
-		Price:         0, // Initialize price as int
+		Price:         0,
 	}
 
-	// First save the newOrderItem to get a valid ID
 	if err := tx.Create(&newOrderItem).Error; err != nil {
 		tx.Rollback()
 		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to create new order")
@@ -51,7 +50,6 @@ func CheckoutOrder(c *gin.Context) {
 		}
 	}
 
-	// Save the updated newOrderItem with the final price
 	if err := tx.Save(&newOrderItem).Error; err != nil {
 		tx.Rollback()
 		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to update order price")
