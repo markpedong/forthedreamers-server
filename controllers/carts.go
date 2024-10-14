@@ -99,10 +99,10 @@ func AddCartItem(c *gin.Context) {
 
 func AddCartItemQuantity(c *gin.Context) {
 	var body struct {
-		CartID   string `form:"cart_id" validate:"required"`
-		Quantity int    `form:"quantity" validate:"required"`
+		CartID   string `json:"cart_id" validate:"required"`
+		Quantity int    `json:"quantity" validate:"required"`
 	}
-	if err := helpers.BindValidateQuery(c, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
@@ -117,7 +117,7 @@ func AddCartItemQuantity(c *gin.Context) {
 		return
 	}
 
-	GetCart(c)
+	helpers.JSONResponse(c, "cart item quantity")
 }
 
 func DeleteCartItem(c *gin.Context) {
