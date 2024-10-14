@@ -117,7 +117,7 @@ func AddCartItemQuantity(c *gin.Context) {
 		return
 	}
 
-	helpers.JSONResponse(c, "cart item quantity")
+	helpers.JSONResponse(c, "")
 }
 
 func DeleteCartItem(c *gin.Context) {
