@@ -24,7 +24,7 @@ type CredentialResponse struct {
 }
 
 type AddressItemReponse struct {
-	ID        string `json:"id" gorm:"primaryKey"`
+	ID        string `json:"id,omitempty"`
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
 	Phone     string `json:"phone" validate:"required"`
@@ -41,4 +41,25 @@ type CartItemResponse struct {
 	Color       string   `json:"color,omitempty" validate:"required"`
 	Price       int      `json:"price" validate:"required"`
 	Image       []string `json:"images" validate:"required"`
+}
+
+type ItemResponse struct {
+	ID          string `json:"id" gorm:"primaryKey"`
+	Quantity    int    `json:"quantity" validate:"required"`
+	ProductName string `json:"name" validate:"required"`
+	ProductID   string `json:"product_id" validate:"required"`
+	Size        string `json:"size,omitempty" validate:"required"`
+	Color       string `json:"color,omitempty" validate:"required"`
+	Price       int    `json:"price" validate:"required"`
+	Image       string `json:"images" validate:"required"`
+}
+
+type OrderItemResponse struct {
+	ID            string             `json:"id"`
+	TotalPrice    int                `json:"total_price" validate:"required"`
+	PaymentMethod int                `json:"payment_method" validate:"required"`
+	Address       AddressItemReponse `json:"address" validate:"required"`
+	Items         []ItemResponse     `json:"items"`
+	CreatedAt     int                `json:"created_at"`
+	Status        int                `json:"status"`
 }

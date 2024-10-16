@@ -215,3 +215,11 @@ func ToJSON(v interface{}) string {
 	}
 	return string(jsonData)
 }
+
+func Keys(m map[string]struct{}) []string {
+	result := make([]string, 0, len(m))
+	for k := range m {
+		result = append(result, k)
+	}
+	return result
+}
