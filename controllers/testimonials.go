@@ -10,8 +10,15 @@ import (
 )
 
 func AddTestimonials(c *gin.Context) {
+	userID := helpers.GetCurrUserToken(c).ID
+
 	var body models.Testimonials
 	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		return
+	}
+
+	var currUser models.Users
+	if err := helpers.GetCurrentByID(c, &currUser, userID); err != nil {
 		return
 	}
 
@@ -21,6 +28,8 @@ func AddTestimonials(c *gin.Context) {
 		Author:    body.Author,
 		Status:    body.Status,
 		ProductID: body.ProductID,
+		Image:     currUser.Image,
+		UserName:  currUser.Username,
 	}
 	if err := helpers.CreateNewData(c, &newTestimonial); err != nil {
 		return
@@ -53,6 +62,9 @@ func PublicTestimonials(c *gin.Context) {
 			"product_id": v.ProductID,
 			"author":     v.Author,
 			"title":      v.Title,
+			"created_at": v.CreatedAt,
+			"image":      v.Image,
+			"username":   v.UserName,
 		}
 		transformedTestimonials = append(transformedTestimonials, newTestimonial)
 	}
