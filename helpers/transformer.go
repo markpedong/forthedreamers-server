@@ -67,6 +67,7 @@ func TransformOrderItem(orderItem models.OrderItem, productsMap map[string]model
 			Price:       variation.Price,
 			CreatedAt:   cartItem.CreatedAt,
 			Image:       product.Images[0],
+			IsReviewed:  cartItem.IsReviewed,
 		})
 	}
 

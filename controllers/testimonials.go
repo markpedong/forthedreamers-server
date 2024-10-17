@@ -90,6 +90,16 @@ func AddOrderReview(c *gin.Context) {
 	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
+
+	var cart models.CartItem
+	if err := helpers.GetCurrentByID(c, &cart, body.CartID); err != nil {
+		return
+	}
+	if cart.IsReviewed == 1 {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "You have already reviewed this product")
+		return
+	}
+
 	var currUser models.Users
 	if err := helpers.GetCurrentByID(c, &currUser, userID); err != nil {
 		return
@@ -107,6 +117,8 @@ func AddOrderReview(c *gin.Context) {
 	if err := helpers.CreateNewData(c, &newTestimonial); err != nil {
 		return
 	}
+	cart.IsReviewed = 1
+	database.DB.Save(&cart)
 
 	helpers.JSONResponse(c, "Review added successfully")
 }

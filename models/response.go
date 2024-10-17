@@ -53,6 +53,7 @@ type ItemResponse struct {
 	Price       int    `json:"price" validate:"required"`
 	Image       string `json:"images" validate:"required"`
 	CreatedAt   int    `json:"created_at"`
+	IsReviewed  int    `json:"is_reviewed"`
 }
 
 type OrderItemResponse struct {

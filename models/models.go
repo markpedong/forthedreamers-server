@@ -116,6 +116,7 @@ type CartItem struct {
 	CreatedAt   int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt   soft_delete.DeletedAt `json:"-"`
+	IsReviewed  int                   `json:"is_reviewed" gorm:"default:0"`
 }
 
 type UserCart struct {
