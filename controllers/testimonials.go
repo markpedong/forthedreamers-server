@@ -71,3 +71,30 @@ func PublicTestimonials(c *gin.Context) {
 
 	helpers.JSONResponse(c, "", helpers.DataHelper(transformedTestimonials))
 }
+
+func AddOrderReview(c *gin.Context) {
+	userID := helpers.GetCurrUserToken(c).ID
+
+	var body models.AddTestimonials
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		return
+	}
+	var currUser models.Users
+	if err := helpers.GetCurrentByID(c, &currUser, userID); err != nil {
+		return
+	}
+
+	newTestimonial := models.Testimonials{
+		ID:        helpers.NewUUID(),
+		Title:     body.Description,
+		Author:    currUser.FirstName + " " + currUser.LastName,
+		ProductID: body.ProductID,
+		Image:     currUser.Image,
+		UserName:  currUser.Username,
+	}
+	if err := helpers.CreateNewData(c, &newTestimonial); err != nil {
+		return
+	}
+
+	helpers.JSONResponse(c, "Review added successfully")
+}

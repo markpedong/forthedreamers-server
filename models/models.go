@@ -96,7 +96,7 @@ type Testimonials struct {
 	ID        string                `json:"id" gorm:"primaryKey"`
 	Title     string                `json:"title" validate:"required"`
 	Author    string                `json:"author" validate:"required"`
-	Status    int                   `json:"status" gorm:"default:0"`
+	Status    int                   `json:"status" gorm:"default:1"`
 	ProductID string                `json:"product_id" validate:"required"`
 	Image     string                `json:"image" validate:"required"`
 	UserName  string                `json:"user_name" validate:"required"`
@@ -123,10 +123,11 @@ type UserCart struct {
 }
 
 type OrderItem struct {
-	ID            string                `json:"id" gorm:"primaryKey"`
-	AddressID     string                `json:"address_id" validate:"required"`
-	Items         []CartItem            `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
-	Status        int                   `json:"status" gorm:"default:0"` // 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered 4 - finished
+	ID        string     `json:"id" gorm:"primaryKey"`
+	AddressID string     `json:"address_id" validate:"required"`
+	Items     []CartItem `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
+	// 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered // user will have to click this in order to become available for review, 4 - to review
+	Status        int                   `json:"status" gorm:"default:0"`
 	PaymentMethod int                   `json:"payment_method" validate:"required"`
 	UserID        string                `json:"user_id"`
 	CreatedAt     int                   `json:"created_at" gorm:"autoCreateTime"`

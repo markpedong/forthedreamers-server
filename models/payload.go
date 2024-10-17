@@ -51,3 +51,9 @@ type ProductPayload struct {
 	Images       pq.StringArray `json:"images" gorm:"type:text[]"  validate:"required"`
 	Features     pq.StringArray `json:"features" gorm:"type:text[]"  validate:"required"`
 }
+
+type AddTestimonials struct {
+	ProductID   string `json:"product_id" validate:"required"`
+	Status      int    `json:"status" validate:"required"`
+	Description string `json:"description"`
+}
