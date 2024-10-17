@@ -74,6 +74,14 @@ func CreateRoutes(r *gin.Engine) {
 		products.POST("/update", controllers.UpdateProducts)
 		products.POST("/delete", controllers.DeleteProducts)
 		products.POST("/toggle", controllers.ToggleProducts)
+		products.POST("/finish", controllers.FinishOrder)
+	}
+
+	reviews := r.Group("/reviews")
+	reviews.Use(middleware.Authentication)
+	{
+		reviews.POST("/add", controllers.AddOrderReview)
+		reviews.GET("/get", controllers.GetUserReview)
 	}
 
 	testimonials := r.Group("/testimonials")
@@ -93,7 +101,6 @@ func CreateRoutes(r *gin.Engine) {
 		users.POST("/toggle", controllers.ToggleUsers)
 		users.POST("/checkout", controllers.CheckoutOrder)
 		users.GET("/orders", controllers.GetOrders)
-		users.POST("/addReview", controllers.AddOrderReview)
 	}
 
 	variations := r.Group("/variations")

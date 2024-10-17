@@ -54,6 +54,6 @@ type ProductPayload struct {
 
 type AddTestimonials struct {
 	ProductID   string `json:"product_id" validate:"required"`
-	Status      int    `json:"status" validate:"required"`
+	Rating      int    `json:"rating" validate:"required"`
 	Description string `json:"description"`
 }

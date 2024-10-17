@@ -10,50 +10,10 @@ import (
 )
 
 func GetCart(c *gin.Context) {
-	userID := helpers.GetCurrUserToken(c).ID
-
-	var userCarts []models.UserCart
-	if err := database.DB.Where("user_id = ?", userID).Find(&userCarts).Error; err != nil {
+	transformedCartItems, err := helpers.TransformCartItems(c, 0)
+	if err != nil {
 		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	var cartItemIDs []string
-	for _, uc := range userCarts {
-		cartItemIDs = append(cartItemIDs, uc.CartItemID)
-	}
-
-	var cartItems []models.CartItem
-	if err := database.DB.
-		Where("id IN ?", cartItemIDs).
-		Where("status = ?", 0).
-		Order("created_at DESC").
-		Find(&cartItems).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	var transformedCartItems []models.CartItemResponse
-	for _, v := range cartItems {
-		var transformedCartItem models.CartItemResponse
-		var product models.Product
-		var variation models.ProductVariation
-		helpers.GetCurrentByID(c, &product, v.ProductID)
-
-		if v.VariationID != "" {
-			helpers.GetCurrentByID(c, &variation, v.VariationID)
-			transformedCartItem.Size = variation.Size
-			transformedCartItem.Color = variation.Color
-			transformedCartItem.Price = variation.Price
-		}
-
-		transformedCartItem.ID = v.ID
-		transformedCartItem.ProductName = product.Name
-		transformedCartItem.Quantity = v.Quantity
-		transformedCartItem.Image = []string{product.Images[0]}
-		transformedCartItem.ProductID = v.ProductID
-
-		transformedCartItems = append(transformedCartItems, transformedCartItem)
 	}
 
 	helpers.JSONResponse(c, "", helpers.DataHelper(transformedCartItems))

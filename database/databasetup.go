@@ -17,7 +17,9 @@ func ConnectDB() {
 	var err error
 	DB, err = gorm.Open(postgres.Open(os.Getenv("DB_DSN")),
 		&gorm.Config{
-			NamingStrategy: schema.NamingStrategy{SingularTable: true},
+			NamingStrategy:         schema.NamingStrategy{SingularTable: true},
+			SkipDefaultTransaction: true,
+			PrepareStmt:            true,
 		})
 	if err != nil {
 		log.Fatal(err.Error())

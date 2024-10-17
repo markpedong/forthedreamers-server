@@ -102,6 +102,7 @@ type Testimonials struct {
 	UserName  string                `json:"user_name" validate:"required"`
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
+	Rating    int                   `json:"rating" validate:"required"`
 	DeletedAt soft_delete.DeletedAt `json:"-"`
 }
 

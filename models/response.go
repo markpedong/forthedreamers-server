@@ -52,6 +52,7 @@ type ItemResponse struct {
 	Color       string `json:"color,omitempty" validate:"required"`
 	Price       int    `json:"price" validate:"required"`
 	Image       string `json:"images" validate:"required"`
+	CreatedAt   int    `json:"created_at"`
 }
 
 type OrderItemResponse struct {

@@ -22,6 +22,7 @@ func init() {
 
 func main() {
 	cloudinary.Init()
+	gin.SetMode(os.Getenv("GIN_MODE"))
 	r := gin.New()
 
 	r.Use(gin.Logger())

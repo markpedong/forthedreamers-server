@@ -72,6 +72,16 @@ func PublicTestimonials(c *gin.Context) {
 	helpers.JSONResponse(c, "", helpers.DataHelper(transformedTestimonials))
 }
 
+func GetUserReview(c *gin.Context) {
+	transformedResponse, err := helpers.GetOrderByStatus(c, true)
+	if err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(c, "", helpers.DataHelper(transformedResponse))
+}
+
 func AddOrderReview(c *gin.Context) {
 	userID := helpers.GetCurrUserToken(c).ID
 
@@ -90,6 +100,7 @@ func AddOrderReview(c *gin.Context) {
 		Author:    currUser.FirstName + " " + currUser.LastName,
 		ProductID: body.ProductID,
 		Image:     currUser.Image,
+		Rating:    body.Rating,
 		UserName:  currUser.Username,
 	}
 	if err := helpers.CreateNewData(c, &newTestimonial); err != nil {

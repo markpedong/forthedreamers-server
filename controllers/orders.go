@@ -99,113 +99,44 @@ func processCartItem(c *gin.Context, tx *gorm.DB, id string, newOrderItem *model
 	return nil
 }
 
-func transformOrderItem(orderItem models.OrderItem, productsMap map[string]models.Product, variationsMap map[string]models.ProductVariation, currAddress models.AddressItem) models.OrderItemResponse {
-	var itemsResponse []models.ItemResponse
-
-	for _, cartItem := range orderItem.Items {
-		product := productsMap[cartItem.ProductID]
-		variation := variationsMap[cartItem.VariationID]
-
-		itemsResponse = append(itemsResponse, models.ItemResponse{
-			ID:          cartItem.ID,
-			Quantity:    cartItem.Quantity,
-			ProductName: product.Name,
-			ProductID:   cartItem.ProductID,
-			Size:        variation.Size,
-			Color:       variation.Color,
-			Price:       variation.Price,
-			Image:       product.Images[0],
-		})
-	}
-
-	totalPrice := calculateTotalPrice(orderItem.Items, variationsMap)
-
-	return models.OrderItemResponse{
-		ID:            orderItem.ID,
-		TotalPrice:    totalPrice,
-		PaymentMethod: orderItem.PaymentMethod,
-		Items:         itemsResponse,
-		Address: models.AddressItemReponse{
-			FirstName: currAddress.FirstName,
-			LastName:  currAddress.LastName,
-			Phone:     currAddress.Phone,
-			Address:   currAddress.Address,
-			IsDefault: currAddress.IsDefault,
-		},
-		CreatedAt: orderItem.CreatedAt,
-		Status:    orderItem.Status,
-	}
-}
-
-func calculateTotalPrice(items []models.CartItem, variationsMap map[string]models.ProductVariation) int {
-	total := 0
-	for _, item := range items {
-		if product, exists := variationsMap[item.VariationID]; exists {
-			total += product.Price * item.Quantity
-		}
-	}
-	return total
-}
-
 func GetOrders(c *gin.Context) {
-	userID := helpers.GetCurrUserToken(c).ID
-
-	var orderItems []models.OrderItem
-	if err := database.DB.Preload("Items").Find(&orderItems, "user_id = ?", userID).Error; err != nil {
+	transformedResponse, err := helpers.GetOrderByStatus(c, false)
+	if err != nil {
 		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	productIDs := make(map[string]struct{})
-	variationIDs := make(map[string]struct{})
-	addressIDs := make(map[string]struct{})
-
-	for _, orderItem := range orderItems {
-		addressIDs[orderItem.AddressID] = struct{}{}
-		for _, cartItem := range orderItem.Items {
-			productIDs[cartItem.ProductID] = struct{}{}
-			variationIDs[cartItem.VariationID] = struct{}{}
-		}
-	}
-
-	var products []models.Product
-	if err := database.DB.Find(&products, "id IN ?", helpers.Keys(productIDs)).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	var variations []models.ProductVariation
-	if err := database.DB.Find(&variations, "id IN ?", helpers.Keys(variationIDs)).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	var addresses []models.AddressItem
-	if err := database.DB.Find(&addresses, "id IN ?", helpers.Keys(addressIDs)).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	productsMap := make(map[string]models.Product)
-	for _, product := range products {
-		productsMap[product.ID] = product
-	}
-
-	variationsMap := make(map[string]models.ProductVariation)
-	for _, variation := range variations {
-		variationsMap[variation.ID] = variation
-	}
-
-	addressMap := make(map[string]models.AddressItem)
-	for _, address := range addresses {
-		addressMap[address.ID] = address
-	}
-
-	var transformedResponse []models.OrderItemResponse
-	for _, orderItem := range orderItems {
-		currAddress := addressMap[orderItem.AddressID]
-		transformedResponse = append(transformedResponse, transformOrderItem(orderItem, productsMap, variationsMap, currAddress))
 	}
 
 	helpers.JSONResponse(c, "", helpers.DataHelper(transformedResponse))
+}
+
+func FinishOrder(c *gin.Context) {
+	var body struct {
+		OrderID string `json:"order_id" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var orderItem models.OrderItem
+	tx := database.DB.Begin()
+	if err := tx.First(&orderItem, "id = ?", body.OrderID).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if orderItem.Status == 3 {
+		orderItem.Status = 4
+		if err := tx.Save(&orderItem).Error; err != nil {
+			tx.Rollback()
+			helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	} else {
+		tx.Rollback()
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "invalid order status")
+		return
+	}
+
+	tx.Commit()
+	helpers.JSONResponse(c, "")
 }
