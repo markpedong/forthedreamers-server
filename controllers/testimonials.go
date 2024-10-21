@@ -65,6 +65,7 @@ func PublicTestimonials(c *gin.Context) {
 			"created_at": v.CreatedAt,
 			"image":      v.Image,
 			"username":   v.UserName,
+			"rating":     v.Rating,
 		}
 		transformedTestimonials = append(transformedTestimonials, newTestimonial)
 	}
