@@ -80,7 +80,7 @@ func Login(c *gin.Context) {
 
 	var existingUser models.Users
 	if err := database.DB.First(&existingUser, "username = ?", body.UserName).Error; err != nil {
-		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "user doesn't exist")
 		return
 	}
 

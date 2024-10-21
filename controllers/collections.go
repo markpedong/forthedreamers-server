@@ -132,9 +132,9 @@ func ToggleCollections(c *gin.Context) {
 
 func GetCollectionByID(c *gin.Context) {
 	var body struct {
-		ID string `json:"id" validate:"required"`
+		ID string `form:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(c, &body); err != nil {
+	if err := helpers.BindValidateQuery(c, &body); err != nil {
 		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
