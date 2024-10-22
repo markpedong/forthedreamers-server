@@ -125,7 +125,7 @@ func RequestEmailOTP(c *gin.Context) {
 
 // 	msg := []byte("To: " + mail + "\r\n" +
 // 		"From: forthedreamersforthedreamers@gmail.com\r\n" +
-// 		"Subject: Test mail\r\n" +
+// 		"Subject: Reset Password OTP Email ( DO NOT SHARE WITH ANYONE )\r\n" +
 // 		"\r\n" +
 // 		"This is a test mail")
 
