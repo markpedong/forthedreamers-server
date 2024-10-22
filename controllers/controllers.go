@@ -5,9 +5,7 @@ import (
 
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/forthedreamers-server/cloudinary"
-	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
-	"github.com/forthedreamers-server/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -53,37 +51,4 @@ func UploadImage(c *gin.Context) {
 	}
 
 	helpers.JSONResponse(c, "upload successful!", helpers.DataHelper(imageRes))
-}
-
-func SignUp(c *gin.Context) {
-	var body struct {
-		FirstName string `json:"first_name" validate:"required"`
-		LastName  string `json:"last_name" validate:"required"`
-		Email     string `json:"email" validate:"required"`
-		Password  string `json:"password" validate:"required"`
-		Username  string `json:"username" validate:"required"`
-	}
-	if err := helpers.BindValidateJSON(c, &body); err != nil {
-		return
-	}
-
-	newUser := models.Users{
-		ID:        helpers.NewUUID(),
-		FirstName: body.FirstName,
-		LastName:  body.LastName,
-		Email:     body.Email,
-		Password:  body.Password,
-		Username:  body.Username,
-	}
-	existingUser := models.Users{}
-	if err := database.DB.Where("email = ? OR username = ?", body.Email, body.Username).First(&existingUser).Error; err == nil {
-		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "email or username already exists")
-		return
-	}
-	if err := helpers.CreateNewData(c, &newUser); err != nil {
-		return
-	}
-
-	userRes := helpers.UserGetTokenResponse(c, &newUser)
-	helpers.JSONResponse(c, "", helpers.DataHelper(userRes))
 }

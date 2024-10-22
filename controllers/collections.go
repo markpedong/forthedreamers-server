@@ -140,7 +140,7 @@ func GetCollectionByID(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Where("status = ?", 1).First(&collection, "id = ?", body.ID).Error; err != nil {
+	if err := database.DB.Select("id, name, images").Where("status = ?", 1).First(&collection, "id = ?", body.ID).Error; err != nil {
 		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}

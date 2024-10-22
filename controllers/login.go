@@ -94,8 +94,89 @@ func Login(c *gin.Context) {
 	helpers.JSONResponse(c, "Logged in successfully!", helpers.DataHelper(userRes))
 }
 
-func RequestEmailOTP(c *gin.Context) {}
+func RequestEmailOTP(c *gin.Context) {
+	var body struct {
+		Email string `json:"email" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		return
+	}
+
+	if err := database.DB.Select("email").First(&models.Users{}, "email = ?", body.Email).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "email doesn't exist")
+		return
+	}
+
+	// if err := sendMailSimple(body.Email); err != nil {
+	// 	helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
+
+	helpers.JSONResponse(c, "Successfully sent!")
+}
+
+// func sendMailSimple(mail string) error {
+// 	auth := smtp.PlainAuth(
+// 		"",
+// 		"forthedreamersforthedreamers@gmail.com",
+// 		os.Getenv("APP_PASSWORD"),
+// 		"smtp.gmail.com",
+// 	)
+
+// 	msg := []byte("To: " + mail + "\r\n" +
+// 		"From: forthedreamersforthedreamers@gmail.com\r\n" +
+// 		"Subject: Test mail\r\n" +
+// 		"\r\n" +
+// 		"This is a test mail")
+
+// 	if err := smtp.SendMail(
+// 		"smtp.gmail.com:587",
+// 		auth,
+// 		"forthedreamersforthedreamers@gmail.com",
+// 		[]string{
+// 			mail,
+// 		},
+// 		msg,
+// 	); err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
 
 func VerifyOTP(c *gin.Context) {}
 
 func SetNewPassword(c *gin.Context) {}
+
+func SignUp(c *gin.Context) {
+	var body struct {
+		FirstName string `json:"first_name" validate:"required"`
+		LastName  string `json:"last_name" validate:"required"`
+		Email     string `json:"email" validate:"required"`
+		Password  string `json:"password" validate:"required"`
+		Username  string `json:"username" validate:"required"`
+	}
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		return
+	}
+
+	newUser := models.Users{
+		ID:        helpers.NewUUID(),
+		FirstName: body.FirstName,
+		LastName:  body.LastName,
+		Email:     body.Email,
+		Password:  body.Password,
+		Username:  body.Username,
+	}
+	existingUser := models.Users{}
+	if err := database.DB.Where("email = ? OR username = ?", body.Email, body.Username).First(&existingUser).Error; err == nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "email or username already exists")
+		return
+	}
+	if err := helpers.CreateNewData(c, &newUser); err != nil {
+		return
+	}
+
+	userRes := helpers.UserGetTokenResponse(c, &newUser)
+	helpers.JSONResponse(c, "User created successfully", helpers.DataHelper(userRes))
+}
