@@ -93,3 +93,9 @@ func Login(c *gin.Context) {
 	userRes := helpers.UserGetTokenResponse(c, &existingUser)
 	helpers.JSONResponse(c, "Logged in successfully!", helpers.DataHelper(userRes))
 }
+
+func RequestEmailOTP(c *gin.Context) {}
+
+func VerifyOTP(c *gin.Context) {}
+
+func SetNewPassword(c *gin.Context) {}

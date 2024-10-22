@@ -1,7 +1,6 @@
 package models
 
 import (
-	// "github.com/lib/pq"
 	"time"
 
 	"github.com/lib/pq"
@@ -10,8 +9,8 @@ import (
 
 type AddressItem struct {
 	ID        string `json:"id" gorm:"primaryKey"`
-	IsDefault int    `json:"is_default" gorm:"default:0"`
-	UserID    string `json:"user_id"`
+	IsDefault int    `json:"is_default" gorm:"default:0;index"`
+	UserID    string `json:"user_id" gorm:"index"`
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
 	Phone     string `json:"phone" validate:"required"`
@@ -22,11 +21,11 @@ type Users struct {
 	ID        string                `json:"id" gorm:"primaryKey"`
 	FirstName string                `json:"first_name" validate:"required"`
 	LastName  string                `json:"last_name" validate:"required"`
-	Phone     string                `json:"phone"`
+	Phone     string                `json:"phone" gorm:"index"`
 	Address   []AddressItem         `json:"address" gorm:"foreignKey:UserID"`
-	Email     string                `json:"email" validate:"required"`
+	Email     string                `json:"email" validate:"required;unique"`
 	Image     string                `json:"image"`
-	Username  string                `json:"username" validate:"required"`
+	Username  string                `json:"username" validate:"required;unique"`
 	Password  string                `json:"password" validate:"required"`
 	CreatedAt int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt int                   `json:"updated_at" gorm:"autoUpdateTime"`
@@ -112,7 +111,7 @@ type CartItem struct {
 	ProductID   string                `json:"product_id" validate:"required"`
 	VariationID string                `json:"variation_id" validate:"required"`
 	OrderItemID *string               `json:"-"`
-	Status      int                   `json:"status" gorm:"default:0"` // 0 - cart, 1 - ordered, 2 - delivered, 3 - canceled/returned
+	Status      int                   `json:"status" gorm:"default:0"`
 	CreatedAt   int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt   soft_delete.DeletedAt `json:"-"`
@@ -125,13 +124,12 @@ type UserCart struct {
 }
 
 type OrderItem struct {
-	ID        string     `json:"id" gorm:"primaryKey"`
-	AddressID string     `json:"address_id" validate:"required"`
-	Items     []CartItem `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
-	// 0 - pending, 1 - in transit, 2 - out for delivery, 3 - delivered // user will have to click this in order to become available for review, 4 - to review
+	ID            string                `json:"id" gorm:"primaryKey"`
+	AddressID     string                `json:"address_id" validate:"required" gorm:"index"`
+	Items         []CartItem            `json:"items" validate:"required" gorm:"foreignKey:OrderItemID"`
 	Status        int                   `json:"status" gorm:"default:0"`
 	PaymentMethod int                   `json:"payment_method" validate:"required"`
-	UserID        string                `json:"user_id"`
+	UserID        string                `json:"user_id" gorm:"index"`
 	CreatedAt     int                   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt     int                   `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt     soft_delete.DeletedAt `json:"-"`
