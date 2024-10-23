@@ -5,10 +5,7 @@ import (
 
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/forthedreamers-server/cloudinary"
-	"github.com/forthedreamers-server/database"
 	"github.com/forthedreamers-server/helpers"
-	"github.com/forthedreamers-server/models"
-	"github.com/forthedreamers-server/tokens"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,66 +26,21 @@ func VerifyPassword(expectedHashedPassword, givenPassword string) (bool, string)
 	}
 }
 
-func Login(ctx *gin.Context) {
-	var body struct {
-		UserName string `json:"username"`
-		Password string `json:"password"`
-	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		return
-	}
-
-	var existingUser models.Users
-	if err := database.DB.First(&existingUser, "username = ?", body.UserName).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	notValid, msg := VerifyPassword(existingUser.Password, body.Password)
-	if notValid {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, msg)
-		return
-	}
-
-	origin := ctx.GetHeader("Origin")
-	if origin == "https://forthedreamers.vercel.app" {
-		if existingUser.Status == 0 {
-			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot login this user, contact admin")
-			return
-		}
-	} else {
-		if existingUser.Role == "USER" {
-			helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, "cannot access this website")
-			return
-		}
-	}
-
-	token, err := tokens.CreateAndSignJWT(&existingUser)
-	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	userRes := map[string]interface{}{
-		"token":    token,
-		"userInfo": existingUser,
-	}
-
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(userRes))
-}
-
-func UploadImage(ctx *gin.Context) {
-	form, err := ctx.FormFile("file")
+func UploadImage(c *gin.Context) {
+	form, err := c.FormFile("file")
 
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	uploadResult, err := cloudinary.CloudinaryService.Upload.Upload(ctx, form, uploader.UploadParams{Folder: "forthedreamers"}) // Transformation: "c_fill,g_auto,h_500,w_500"
+	uploadResult, err := cloudinary.CloudinaryService.Upload.Upload(c, form, uploader.UploadParams{
+		Folder:         "forthedreamers",
+		Transformation: "f_webp,q_auto:good,fl_lossy,c_fit",
+	})
 
 	if err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -98,5 +50,5 @@ func UploadImage(ctx *gin.Context) {
 		"size":     uploadResult.Bytes,
 	}
 
-	helpers.JSONResponse(ctx, "upload successful!", helpers.DataHelper(imageRes))
+	helpers.JSONResponse(c, "upload successful!", helpers.DataHelper(imageRes))
 }

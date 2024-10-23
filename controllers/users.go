@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AddUsers(ctx *gin.Context) {
+func AddUsers(c *gin.Context) {
 	var body models.UserPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
@@ -24,78 +24,95 @@ func AddUsers(ctx *gin.Context) {
 		Image:     body.Image,
 		Username:  body.Username,
 		Password:  body.Password,
-		Role:      body.Role,
 	}
-	if err := helpers.CreateNewData(ctx, &newUser); err != nil {
+	if err := helpers.CreateNewData(c, &newUser); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func GetUsers(ctx *gin.Context) {
+func GetUserInfo(c *gin.Context) {
+	user := helpers.GetCurrUserToken(c)
+
+	newUserResponse := models.UsersResponse{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Image:     user.Image,
+		Username:  user.Username,
+		Phone:     user.Phone,
+	}
+
+	helpers.JSONResponse(c, "", helpers.DataHelper(newUserResponse))
+}
+
+func GetUsers(c *gin.Context) {
 	var users []models.Users
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
-	helpers.GetTableByModel(ctx, &users)
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(&users))
+	helpers.GetTableByModel(c, &users)
+	helpers.JSONResponse(c, "", helpers.DataHelper(&users))
 }
 
-func UpdateUsers(ctx *gin.Context) {
-	var body models.UserPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+func UpdateUsers(c *gin.Context) {
+	var body models.UpdateUserPayload
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
-	var currUser models.Users
-	if err := helpers.GetCurrentByID(ctx, &currUser, body.ID); err != nil {
+	currUser := helpers.GetCurrUserToken(c)
+	if currUser.Password != body.OldPassword {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "old password is not correct")
+		return
+	}
+	if body.NewPassword == body.OldPassword {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, "old password and new password is same")
 		return
 	}
 
-	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
-	helpers.UpdateByModel(ctx, &currUser, models.Users{
+	helpers.UpdateByModel(c, &currUser, models.Users{
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
 		Image:     body.Image,
 		Phone:     body.Phone,
-		Address:   body.Address,
 		Email:     body.Email,
 		Username:  body.Username,
-		Password:  body.Password,
-		Role:      body.Role,
+		Password:  body.NewPassword,
 	})
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "Successfully updated!")
 }
 
-func DeleteUsers(ctx *gin.Context) {
+func DeleteUsers(c *gin.Context) {
 	var body struct {
 		ID string `json:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currUser models.Users
-	if err := helpers.GetCurrentByID(ctx, &currUser, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currUser, body.ID); err != nil {
 		return
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE USER IS EXISTENT
-	helpers.DeleteByModel(ctx, &currUser)
-	helpers.JSONResponse(ctx, "")
+	helpers.DeleteByModel(c, &currUser)
+	helpers.JSONResponse(c, "")
 }
 
-func ToggleUsers(ctx *gin.Context) {
+func ToggleUsers(c *gin.Context) {
 	var body struct {
 		ID string `json:"ID" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := helpers.ToggleModelByID(ctx, &models.Users{}, body.ID); err != nil {
+	if err := helpers.ToggleModelByID(c, &models.Users{}, body.ID); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }

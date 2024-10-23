@@ -17,23 +17,34 @@ func ConnectDB() {
 	var err error
 	DB, err = gorm.Open(postgres.Open(os.Getenv("DB_DSN")),
 		&gorm.Config{
-			NamingStrategy: schema.NamingStrategy{SingularTable: true},
+			NamingStrategy:         schema.NamingStrategy{SingularTable: true},
+			SkipDefaultTransaction: true,
+			PrepareStmt:            true,
 		})
 	if err != nil {
 		log.Fatal(err.Error())
 		return
 	}
 
-	err = DB.AutoMigrate(
+	if err := DB.AutoMigrate(
 		&models.Users{},
 		&models.Collection{},
 		&models.Product{},
 		&models.ProductVariation{},
 		&models.WebsiteData{},
 		&models.Testimonials{},
-	)
-	if err != nil {
+		&models.UserCart{},
+		&models.AddressItem{},
+	); err != nil {
 		log.Fatal(err.Error())
+		return
+	}
+
+	if err2 := DB.AutoMigrate(
+		&models.CartItem{},
+		&models.OrderItem{},
+	); err2 != nil {
+		log.Fatal(err2.Error())
 		return
 	}
 

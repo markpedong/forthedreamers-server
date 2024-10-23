@@ -20,16 +20,16 @@ func CreateNewProduct(payload *models.ProductPayload) models.Product {
 	}
 }
 
-func PublicProductDetails(ctx *gin.Context) {
+func PublicProductDetails(c *gin.Context) {
 	var body struct {
-		ID string `json:"product_id" validate:"required"`
+		ID string `form:"product_id,omitempty"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateQuery(c, &body); err != nil {
 		return
 	}
 
 	var currProduct models.Product
-	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currProduct, body.ID); err != nil {
 		return
 	}
 
@@ -41,79 +41,73 @@ func PublicProductDetails(ctx *gin.Context) {
 		"features":    currProduct.Features,
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(filteredProduct))
+	helpers.JSONResponse(c, "", helpers.DataHelper(filteredProduct))
 }
 
-func PublicProducts(ctx *gin.Context) {
+func PublicProducts(c *gin.Context) {
 	var body struct {
-		Search   string `json:"search"`
-		PageSize int    `json:"page_size"`
-		Page     int    `json:"page"`
+		Search   string `form:"search"`
+		PageSize int    `form:"page_size"`
+		Page     int    `form:"page"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateQuery(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	query := database.DB.Preload("Variations", func(db *gorm.DB) *gorm.DB {
-		return db.
-			Where("status = ?", 1).
-			Order("created_at DESC")
-	})
-	if body.Page == 0 {
-		body.Page = 1
+		return db.Where("status = ?", 1).Order("created_at DESC")
+	}).Where("status = ?", 1)
+
+	if body.PageSize > 0 && body.Page > 0 {
+		query.Offset((body.Page - 1) * body.PageSize).Limit(body.PageSize)
 	}
 
-	if body.PageSize == 0 {
-		body.PageSize = 10
+	if body.Search != "" {
+		query = query.Where("name ILIKE ?", "%"+body.Search+"%")
 	}
 
 	var products []models.Product
-	if err := query.
-		Limit(body.PageSize).
-		Offset((body.Page-1)*body.PageSize).
-		Where("name ILIKE ? AND status = ?", "%"+body.Search+"%", 1).
-		Find(&products).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err := query.Find(&products).Error; err != nil {
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, "Failed to fetch products")
 		return
 	}
 
-	var filteredProducts []map[string]interface{}
-	for _, product := range products {
-		var filteredVariations []map[string]interface{}
-		for _, w := range product.Variations {
-			variation := map[string]interface{}{
+	filteredProducts := make([]map[string]interface{}, len(products))
+	for i, product := range products {
+		filteredVariations := make([]map[string]interface{}, len(product.Variations))
+		for j, w := range product.Variations {
+			filteredVariations[j] = map[string]interface{}{
 				"id":    w.ID,
 				"size":  w.Size,
 				"color": w.Color,
 				"price": w.Price,
 			}
-			filteredVariations = append(filteredVariations, variation)
 		}
 
-		filteredProduct := map[string]interface{}{
+		filteredProducts[i] = map[string]interface{}{
 			"id":          product.ID,
 			"name":        product.Name,
 			"description": product.Description,
 			"images":      product.Images,
 			"variations":  filteredVariations,
 		}
-		filteredProducts = append(filteredProducts, filteredProduct)
 	}
 
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(filteredProducts))
+	helpers.JSONResponse(c, "", helpers.DataHelper(filteredProducts))
 }
 
-func GetProducts(ctx *gin.Context) {
+func GetProducts(c *gin.Context) {
 	var products []models.Product
 
 	//NO NEED TO HANDLE ERROR BECAUSE PRODUCT IS EXISTENT
-	helpers.GetTableByModel(ctx, &products)
-	helpers.JSONResponse(ctx, "", helpers.DataHelper(products))
+	helpers.GetTableByModel(c, &products)
+	helpers.JSONResponse(c, "", helpers.DataHelper(products))
 }
 
-func AddProducts(ctx *gin.Context) {
+func AddProducts(c *gin.Context) {
 	var body models.ProductPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
@@ -126,74 +120,74 @@ func AddProducts(ctx *gin.Context) {
 		Features:     body.Features,
 	}
 
-	if err := helpers.CreateNewData(ctx, &newProduct); err != nil {
+	if err := helpers.CreateNewData(c, &newProduct); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func UpdateProducts(ctx *gin.Context) {
+func UpdateProducts(c *gin.Context) {
 	var body models.ProductPayload
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
 		return
 	}
 
 	var currProduct models.Product
-	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currProduct, body.ID); err != nil {
 		return
 	}
 
 	//NO NEED TO HANDLE ERROR BECAUSE PRODUCT IS EXISTENT
-	helpers.UpdateByModel(ctx, &currProduct, models.Product{
+	helpers.UpdateByModel(c, &currProduct, models.Product{
 		Name:         body.Name,
 		Images:       body.Images,
 		Description:  body.Description,
 		CollectionID: body.CollectionID,
 		Features:     body.Features,
 	})
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
 
-func DeleteProducts(ctx *gin.Context) {
+func DeleteProducts(c *gin.Context) {
 	var body struct {
 		ID string `json:"id" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var currProduct models.Product
-	if err := helpers.GetCurrentByID(ctx, &currProduct, body.ID); err != nil {
+	if err := helpers.GetCurrentByID(c, &currProduct, body.ID); err != nil {
 		return
 	}
 
 	var variations []models.ProductVariation
 	if err := database.DB.Find(&variations, "product_id = ?", currProduct.ID).Error; err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusInternalServerError, err.Error())
+		helpers.ErrJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	for _, v := range variations {
-		helpers.DeleteByModel(ctx, &v)
+		helpers.DeleteByModel(c, &v)
 	}
 
 	// NO NEED TO HANDLE ERROR HERE BECAUSE CURRPRODUCT IS EXISTENT
-	helpers.DeleteByModel(ctx, &currProduct)
-	helpers.JSONResponse(ctx, "")
+	helpers.DeleteByModel(c, &currProduct)
+	helpers.JSONResponse(c, "")
 }
 
-func ToggleProducts(ctx *gin.Context) {
+func ToggleProducts(c *gin.Context) {
 	var body struct {
 		ID string `json:"ID" validate:"required"`
 	}
-	if err := helpers.BindValidateJSON(ctx, &body); err != nil {
-		helpers.ErrJSONResponse(ctx, http.StatusBadRequest, err.Error())
+	if err := helpers.BindValidateJSON(c, &body); err != nil {
+		helpers.ErrJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := helpers.ToggleModelByID(ctx, &models.Product{}, body.ID); err != nil {
+	if err := helpers.ToggleModelByID(c, &models.Product{}, body.ID); err != nil {
 		return
 	}
 
-	helpers.JSONResponse(ctx, "")
+	helpers.JSONResponse(c, "")
 }
